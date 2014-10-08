@@ -1,0 +1,4 @@
+- disk I/O
+- Makefile
+- share libraries with uk101
+- memory above 8k
