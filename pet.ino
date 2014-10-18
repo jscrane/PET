@@ -3,46 +3,26 @@
 #include <SpiRAM.h>
 #include <UTFT.h>
 #include <SD.h>
+#include <r65emu.h>
 
 #include <setjmp.h>
 #include <stdarg.h>
 
-#include "hardware.h"
 #include "config.h"
-#include "Memory.h"
-#include "cpu.h"
-#include "r6502.h"
-#include "ram.h"
-#include "spiram.h"
-#include "prom.h"
 #include "display.h"
-#include "ps2drv.h"
 #include "petio.h"
 
-/*
-#include "basic2_c000.h"
-#include "basic2_d000.h"
-#include "kernal2.h"
-#include "edit2.h"
-*/
-
-#include "basic4_b000.h"
-#include "basic4_c000.h"
-#include "basic4_d000.h"
-#include "kernal4.h"
-#include "edit4.h"
+#include "roms/basic4_b000.h"
+#include "roms/basic4_c000.h"
+#include "roms/basic4_d000.h"
+#include "roms/kernal4.h"
+#include "roms/edit4.h"
 
 static bool halted = false;
 
 PS2Driver ps2;
 
 Memory memory;
-/*
-prom basica(basic2_c000, 4096);
-prom basicb(basic2_d000, 4096);
-prom kernal(kernal2, 4096);
-prom edit(edit2, 2048);
-*/
 prom basica(basic4_b000, 4096);
 prom basicb(basic4_c000, 4096);
 prom basicc(basic4_d000, 4096);

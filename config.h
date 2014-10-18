@@ -15,9 +15,6 @@
 #define SPIRAM_SIZE     0x6000
 #define SPIRAM_BASE     0x2000
 
-// watch the CPU execute (slowly) on the serial port
-//#define CPU_DEBUG
-
 // number of CPU instructions to run per loop
 #define CPU_INSTRUCTIONS  750
 

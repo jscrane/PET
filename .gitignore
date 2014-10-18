@@ -3,3 +3,4 @@
 libcore.a
 pet.elf
 pet.bin
+.*.d

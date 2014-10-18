@@ -1,12 +1,11 @@
 #include <Energia.h>
 #include <UTFT.h>
+#include <memory.h>
+#include <hardware.h>
 
-#include "hardware.h"
 #include "config.h"
-#include "Memory.h"
 #include "display.h"
-//#include "characters2.h"
-#include "characters_vic20.h"
+#include "roms/characters_vic20.h"
 
 static UTFT d(TFT_MODEL, TFT_RS, TFT_WR, TFT_CS, TFT_RST);
 static unsigned cx, cy, dx, dy, oxs;
