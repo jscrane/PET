@@ -12,7 +12,6 @@
 #define RAM_SIZE	0x2000
 
 // SPI-RAM
-#define SPIRAM_SIZE     0x6000
 #define SPIRAM_BASE     0x2000
 
 // number of CPU instructions to run per loop

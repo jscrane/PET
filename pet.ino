@@ -71,11 +71,6 @@ void reset() {
 void setup() {
   Serial.begin(115200);
   ps2.begin(KBD_DATA, KBD_IRQ);
-  
-  memory.put(basica, 0xb000);
-  memory.put(basicb, 0xc000);
-  memory.put(basicc, 0xd000);
-  memory.put(edit, 0xe000);
   memory.put(kernal, 0xf000);
 
   for (int i = 0; i < RAM_SIZE; i += 1024)
@@ -85,8 +80,12 @@ void setup() {
   memory.put(disp, 0x8000);
   memory.put(io, 0xe800);
   
+  memory.put(basica, 0xb000);
+  memory.put(basicb, 0xc000);
+  memory.put(basicc, 0xd000);
+  memory.put(edit, 0xe000);
+  
   reset();
-  Serial.println("hello world");
 }
 
 void loop() {
