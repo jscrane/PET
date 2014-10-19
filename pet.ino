@@ -1,4 +1,3 @@
-#include <Energia.h>
 #include <SPI.h>
 #include <SpiRAM.h>
 #include <UTFT.h>
@@ -20,9 +19,6 @@
 
 static bool halted = false;
 
-PS2Driver ps2;
-
-Memory memory;
 prom basica(basic4_b000, 4096);
 prom basicb(basic4_c000, 4096);
 prom basicc(basic4_d000, 4096);
@@ -30,7 +26,6 @@ prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
 
 ram pages[RAM_SIZE / 1024];
-spiram sram(SPIRAM_SIZE);
 display disp;
 petio io;
 
@@ -49,12 +44,10 @@ jmp_buf ex;
 r6502 cpu(&memory, &ex, status);
 
 void reset() {
+  bool sd = hardware_init();
+
   io.reset();  
   cpu.reset();
-
-  // initialise SD card even though it's not used yet...
-  pinMode(SD_CS, OUTPUT);
-  bool sd = SD.begin(SD_CS, 3, SD_SPI);
 
   disp.begin();
   if (!sd)
@@ -69,16 +62,11 @@ void reset() {
     disp.status("No SD Card");
     */
 
-  // must initialise spiram after SD card (if it shares the same bus)
-  sram.begin(SPIRAM_CS, SPIRAM_SPI);
-
   halted = (setjmp(ex) != 0);
 }
 
 void setup() {
   Serial.begin(115200);
-  ps2.begin(KBD_DATA, KBD_IRQ);
-  memory.put(kernal, 0xf000);
 
   for (int i = 0; i < RAM_SIZE; i += 1024)
     memory.put(pages[i / 1024], i);
@@ -91,6 +79,7 @@ void setup() {
   memory.put(basicb, 0xc000);
   memory.put(basicc, 0xd000);
   memory.put(edit, 0xe000);
+  memory.put(kernal, 0xf000);
   
   reset();
 }
