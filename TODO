@@ -1,4 +1,3 @@
 - tape input
 - disk I/O
-- memory above 8k
 - lower-case character-set (uses VIA pin connected to charset rom)

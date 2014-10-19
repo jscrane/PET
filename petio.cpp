@@ -17,11 +17,13 @@ void petio::operator= (byte r) {
     return;
   }
 
+/*
   Serial.print(millis());
   Serial.print(' ');
   Serial.print(addr);
   Serial.print(' ');
   Serial.println(r, 16);
+*/
 }
 
 // maps scan codes to pet rows/cols
@@ -164,9 +166,11 @@ byte petio::pattern() {
   if (addr == 59469)
     return 0x40; // timer #1
 
+/*
   Serial.print(millis());
   Serial.print(' ');
   Serial.println(addr);
+*/
 
   // some other device...
   return 0x00;

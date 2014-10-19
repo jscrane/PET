@@ -52,7 +52,14 @@ void reset() {
   io.reset();  
   cpu.reset();
 
+  // initialise SD card even though it's not used yet...
+  pinMode(SD_CS, OUTPUT);
+  bool sd = SD.begin(SD_CS, 3, SD_SPI);
+
   disp.begin();
+  if (!sd)
+    disp.status("No SD Card");
+
 /*
   bool sd = tape.begin(SD_CS, SD_SPI);
   disp.begin();
