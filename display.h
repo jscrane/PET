@@ -3,19 +3,21 @@
 
 class display: public UTFTDisplay {
 public:
-  virtual void operator= (byte c) { _set(_acc, c); }
-  virtual operator byte () { return _mem[_acc]; }
+	virtual void operator= (byte c) {
+		if (c != _mem[_acc]) { _mem[_acc] = c; _draw(_acc, c); }
+	}
+	virtual operator byte () { return _mem[_acc]; }
 
-  void checkpoint(Stream &s);
-  void restore(Stream &s);
+	virtual void checkpoint(Stream &s);
+	virtual void restore(Stream &s);
 
-  display() : UTFTDisplay(sizeof(_mem)), _resolution(0) {}
-  void begin();
+	display() : UTFTDisplay(sizeof(_mem)), _resolution(0) {}
+	void begin();
 
 private:
-  void _set(Memory::address a, byte c);
+	void _draw(Memory::address a, byte c);
 
-  byte _mem[DISPLAY_RAM_SIZE];
-  int _resolution;
+	byte _mem[DISPLAY_RAM_SIZE];
+	int _resolution;
 };
 #endif

@@ -1,7 +1,5 @@
-#include <Energia.h>
-
 #include <memory.h>
-#include <cpu.h>
+#include <keyboard.h>
 #include "petio.h"
 
 static unsigned a(unsigned acc)
