@@ -3,9 +3,7 @@
 
 class display: public UTFTDisplay {
 public:
-	virtual void operator= (byte c) {
-		if (c != _mem[_acc]) { _mem[_acc] = c; _draw(_acc, c); }
-	}
+	virtual void operator= (byte c) { _set(_acc, c); }
 	virtual operator byte () { return _mem[_acc]; }
 
 	virtual void checkpoint(Stream &s);
@@ -15,6 +13,9 @@ public:
 	void begin();
 
 private:
+	inline void _set(Memory::address a, byte c) {
+		if (c != _mem[_acc]) { _mem[_acc] = c; _draw(_acc, c); }
+	}
 	void _draw(Memory::address a, byte c);
 
 	byte _mem[DISPLAY_RAM_SIZE];

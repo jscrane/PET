@@ -44,11 +44,9 @@ jmp_buf ex;
 r6502 cpu(&memory, &ex, status);
 
 void reset() {
-  bool sd = hardware_init();
+  bool sd = hardware_init(cpu);
 
   io.reset();  
-  cpu.reset();
-
   disp.begin();
   if (!sd)
     disp.status("No SD Card");
@@ -87,7 +85,7 @@ void setup() {
 void loop() {
   if (ps2.available()) {
     unsigned key = ps2.read();
-    char cpbuf[13];
+    char cpbuf[32];
     int n;
     File file;
     switch (key) {
@@ -127,13 +125,10 @@ void loop() {
       case PS2_F6:
         if (ps2.isbreak()) {
           tape.stop();
-          snprintf(cpbuf, sizeof(cpbuf), "%s.%03d", chkpt, cpid++);
+          snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s.%03d", chkpt, cpid++);
           file = SD.open(cpbuf, O_WRITE | O_CREAT | O_TRUNC);
-          cpu.checkpoint(file);
-          disp.checkpoint(file);
-          for (int i = 0; i < RAM_SIZE; i += 1024)
-            pages[i / 1024].checkpoint(file);
-          sram.checkpoint(file);
+          file.write(currmon);
+          hardware_checkpoint(file);
           file.close();
           tape.start();
           disp.status(cpbuf);
@@ -142,15 +137,13 @@ void loop() {
       case PS2_F7:
         if (ps2.isbreak() && filename) {
           tape.stop();
-          file = SD.open(filename, O_READ);
-          cpu.restore(file);
-          disp.clear();
-          disp.restore(file);
-          for (int i = 0; i < RAM_SIZE; i += 1024)
-            pages[i / 1024].restore(file);
-          sram.restore(file);
+          snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s", filename);
+          file = SD.open(cpbuf, O_READ);
+          currmon = file.read();
+          memory.put(monitors[currmon], 0xf800);
+          hardware_restore(file);
           file.close();
-          n = sscanf(filename, "%[A-Z0-9].%d", chkpt, &cpid);
+          n = sscanf(cpbuf + strlen(PROGRAMS), "%[A-Z0-9].%d", chkpt, &cpid);
           cpid = (n == 1)? 0: cpid+1;
           tape.start();
         }
