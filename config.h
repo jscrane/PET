@@ -13,6 +13,7 @@
 
 // SPI-RAM
 #define SPIRAM_BASE     0x2000
+#define SPIRAM_EXTENT	(24 * 1024 / 256)
 
 // number of CPU instructions to run per loop
 #define CPU_INSTRUCTIONS  750
