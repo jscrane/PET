@@ -9,7 +9,7 @@ public:
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
 
-	display() : UTFTDisplay(sizeof(_mem)), _resolution(0) {}
+	display(port &upr): UTFTDisplay(sizeof(_mem)), _resolution(0), _upr(upr) {}
 	void begin();
 
 private:
@@ -20,5 +20,6 @@ private:
 
 	byte _mem[DISPLAY_RAM_SIZE];
 	int _resolution;
+	port &_upr;
 };
 #endif

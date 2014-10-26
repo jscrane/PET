@@ -8,6 +8,7 @@
 #include <stdarg.h>
 
 #include "config.h"
+#include "port.h"
 #include "display.h"
 #include "petio.h"
 
@@ -26,8 +27,8 @@ prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
 
 ram pages[RAM_SIZE / 1024];
-display disp;
 petio io;
+display disp(io.CA2);
 
 void status(const char *fmt, ...) {
   char tmp[256];  

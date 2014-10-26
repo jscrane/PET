@@ -4,6 +4,7 @@
 #include <hardware.h>
 
 #include "config.h"
+#include "port.h"
 #include "display.h"
 #include "roms/characters_vic20.h"
 
@@ -32,8 +33,11 @@ void display::_draw(Memory::address a, byte c)
 	if (y >= _dy)
 		return;
 
+	unsigned short ch = c;
+	if (_upr.read())
+		ch += 256;
 	for (unsigned i = 0; i < r.ch; i++) {
-		byte b = charset[c][i];
+		byte b = charset[ch][i];
 		for (unsigned j = 0; j < r.cw; j++) {
 			int _cx = x + r.cw - j;
 			utft.setColor((b & (1 << j))? TFT_FG: TFT_BG);

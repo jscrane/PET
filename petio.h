@@ -13,6 +13,7 @@ public:
 
 	petio(): Memory::Device(256), _row(0) {}
 
+	port CA2;
 private:
 	byte _map(byte);
 	void _set(byte);
