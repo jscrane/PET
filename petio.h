@@ -14,6 +14,8 @@ public:
 	petio(): Memory::Device(256), _row(0) {}
 
 	port CA2;
+
+	sdtape tape;
 private:
 	byte _map(byte);
 	void _set(byte);

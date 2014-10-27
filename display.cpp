@@ -59,6 +59,10 @@ void display::checkpoint(Stream &s)
 void display::restore(Stream &s)
 {
 	_resolution = s.read();
-	for (int i = 0; i < sizeof(_mem); i++)
-		_set(i, s.read());
+	for (unsigned p = 0; p < sizeof(_mem); p += Memory::page_size) {
+		char buf[Memory::page_size];
+		s.readBytes(buf, sizeof(buf));
+		for (unsigned i = 0; i < Memory::page_size; i++)
+			_set(p + i, buf[i]);
+	}
 }

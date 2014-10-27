@@ -18,4 +18,7 @@
 // number of CPU instructions to run per loop
 #define CPU_INSTRUCTIONS  750
 
+// where programs and images are stored
+#define PROGRAMS        "/pet/"
+
 #endif

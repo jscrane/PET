@@ -1,2 +1,3 @@
 - tape input
 - disk I/O
+- hang when scrolling vertically

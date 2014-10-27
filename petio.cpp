@@ -1,6 +1,7 @@
 #include <Energia.h>
 #include <memory.h>
 #include <keyboard.h>
+#include <sdtape.h>
 #include "port.h"
 #include "petio.h"
 

@@ -14,7 +14,7 @@ public:
 
 private:
 	inline void _set(Memory::address a, byte c) {
-		if (c != _mem[_acc]) { _mem[_acc] = c; _draw(_acc, c); }
+		if (c != _mem[a]) { _mem[a] = c; _draw(a, c); }
 	}
 	void _draw(Memory::address a, byte c);
 

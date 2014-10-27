@@ -44,22 +44,19 @@ void status(const char *fmt, ...) {
 jmp_buf ex;
 r6502 cpu(&memory, &ex, status);
 
+const char *filename;
+char chkpt[] = { "CHKPOINT" };
+int cpid = 0;
+
 void reset() {
   bool sd = hardware_init(cpu);
 
   io.reset();  
   disp.begin();
-  if (!sd)
-    disp.status("No SD Card");
-
-/*
-  bool sd = tape.begin(SD_CS, SD_SPI);
-  disp.begin();
   if (sd)
-    tape.start();
+    io.tape.start(PROGRAMS);
   else
     disp.status("No SD Card");
-    */
 
   halted = (setjmp(ex) != 0);
 }
@@ -86,76 +83,49 @@ void setup() {
 void loop() {
   if (ps2.available()) {
     unsigned key = ps2.read();
-    char cpbuf[32];
-    int n;
-    File file;
-    switch (key) {
+    if (!ps2.isbreak())
+      io.down(key);
+    else {
+      char cpbuf[32];
+      int n;
+      File file;
+      switch (key) {
       case PS2_F1:
-        if (ps2.isbreak())
-          reset();
+        reset();
         break;
-        /*
       case PS2_F2:
-        if (ps2.isbreak()) {
-          filename = tape.advance();
-          disp.status(filename);
-        }
+        filename = io.tape.advance();
+        disp.status(filename);
         break;
       case PS2_F3:
-        if (ps2.isbreak()) {
-          filename = tape.rewind();
-          disp.status(filename);
-        }
+        filename = io.tape.rewind();
+        disp.status(filename);
         break;
-      case PS2_F4:
-        if (ps2.isbreak()) {
-          currmon++;
-          if (currmon == sizeof(monitors) / sizeof(monitors[0]))
-            currmon = 0;
-          memory.put(monitors[currmon], 0xf800);
-          cpu.reset();
-        }
-        break; 
-      case PS2_F5:
-        if (ps2.isbreak()) {
-          disp.clear();
-          disp.status(disp.changeResolution());
-          cpu.reset();
-        }
-        break; 
       case PS2_F6:
-        if (ps2.isbreak()) {
-          tape.stop();
-          snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s.%03d", chkpt, cpid++);
-          file = SD.open(cpbuf, O_WRITE | O_CREAT | O_TRUNC);
-          file.write(currmon);
-          hardware_checkpoint(file);
-          file.close();
-          tape.start();
-          disp.status(cpbuf);
-        }
+        io.tape.stop();
+        snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s.%03d", chkpt, cpid++);
+        file = SD.open(cpbuf, O_WRITE | O_CREAT | O_TRUNC);
+        hardware_checkpoint(file);
+        file.close();
+        io.tape.start(PROGRAMS);
+        disp.status(cpbuf);
         break;
       case PS2_F7:
-        if (ps2.isbreak() && filename) {
-          tape.stop();
+        if (filename) {
+          io.tape.stop();
           snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s", filename);
           file = SD.open(cpbuf, O_READ);
-          currmon = file.read();
-          memory.put(monitors[currmon], 0xf800);
           hardware_restore(file);
           file.close();
           n = sscanf(cpbuf + strlen(PROGRAMS), "%[A-Z0-9].%d", chkpt, &cpid);
           cpid = (n == 1)? 0: cpid+1;
-          tape.start();
+          io.tape.start(PROGRAMS);
         }
         break; 
-        */
       default:
-        if (ps2.isbreak())
-          io.up(key);
-        else
-          io.down(key);      
+        io.up(key);
         break;
+      }
     }
   } else if (!halted) {
     cpu.run(CPU_INSTRUCTIONS);
