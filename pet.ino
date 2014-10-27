@@ -10,6 +10,7 @@
 #include "config.h"
 #include "port.h"
 #include "display.h"
+#include "kbd.h"
 #include "petio.h"
 
 #include "roms/basic4_b000.h"
@@ -51,7 +52,7 @@ int cpid = 0;
 void reset() {
   bool sd = hardware_init(cpu);
 
-  io.reset();  
+  io.keyboard.reset();  
   disp.begin();
   if (sd)
     io.tape.start(PROGRAMS);
@@ -84,7 +85,7 @@ void loop() {
   if (ps2.available()) {
     unsigned key = ps2.read();
     if (!ps2.isbreak())
-      io.down(key);
+      io.keyboard.down(key);
     else {
       char cpbuf[32];
       int n;
@@ -123,7 +124,7 @@ void loop() {
         }
         break; 
       default:
-        io.up(key);
+        io.keyboard.up(key);
         break;
       }
     }

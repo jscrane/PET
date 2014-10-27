@@ -2,28 +2,21 @@
 #define __PETIO_H
 
 // this occupies all of the addresses (and more) dedicated to the two PIAs and the VIA
-class petio: public Memory::Device, public Keyboard {
+class petio: public Memory::Device {
 public:
-	void operator= (byte);
-	operator byte() { return pattern(); }
+	void operator= (byte b) { write(b); }
+	operator byte() { return read(); }
 
-	void up(byte);
-	void down(byte);
-	void reset();
-
-	petio(): Memory::Device(256), _row(0) {}
+	petio(): Memory::Device(256) {}
 
 	port CA2;
 
 	sdtape tape;
+	kbd keyboard;
+
 private:
-	byte _map(byte);
-	void _set(byte);
-	void _reset(byte);
-	byte _rows[10];
-	byte pattern();
-	byte _row;
-	bool _ctrl, _shift;
+	void write(byte b);
+	byte read();
 };
 
 #endif
