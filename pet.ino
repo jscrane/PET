@@ -27,12 +27,13 @@ prom basicc(basic4_d000, 4096);
 prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
 
+port irq;
 ram pages[RAM_SIZE / 1024];
-petio io;
+petio io(irq);
 display disp(io.CA2);
 
 void status(const char *fmt, ...) {
-  char tmp[256];  
+  char tmp[256];
   va_list args;
   va_start(args, fmt);
   vsnprintf(tmp, sizeof(tmp), fmt, args);
@@ -52,7 +53,7 @@ int cpid = 0;
 void reset() {
   bool sd = hardware_init(cpu);
 
-  io.keyboard.reset();  
+  io.reset();
   disp.begin();
   if (sd)
     io.tape.start(PROGRAMS);
@@ -71,13 +72,13 @@ void setup() {
   memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
   memory.put(disp, 0x8000);
   memory.put(io, 0xe800);
-  
+
   memory.put(basica, 0xb000);
   memory.put(basicb, 0xc000);
   memory.put(basicc, 0xd000);
   memory.put(edit, 0xe000);
   memory.put(kernal, 0xf000);
-  
+
   reset();
 }
 
@@ -122,7 +123,7 @@ void loop() {
           cpid = (n == 1)? 0: cpid+1;
           io.tape.start(PROGRAMS);
         }
-        break; 
+        break;
       default:
         io.keyboard.up(key);
         break;
@@ -130,12 +131,8 @@ void loop() {
     }
   } else if (!halted) {
     cpu.run(CPU_INSTRUCTIONS);
-    
-    // simulate regular system interrupt
-    static unsigned last = 0;
-    unsigned now = millis();
-    if (now - last > 50) {
-      last = now;
+    if (irq.read()) {
+      irq.write(false);
       cpu.raise(0);
     }
   }

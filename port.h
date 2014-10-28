@@ -8,7 +8,7 @@ public:
 	void write(bool state) { _state = state; }
 
 private:
-	bool _state;
+	volatile bool _state;
 };
 
 #endif
