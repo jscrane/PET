@@ -10,7 +10,7 @@ public:
 	void operator= (byte b) { write(b); }
 	operator byte() { return read(); }
 
-	petio(port &irq): Memory::Device(256), _irq(irq) {}
+	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0) {}
 	void reset();
 	void tick();
 
@@ -26,6 +26,7 @@ private:
 	port &_irq;
 	volatile bool _timer1, _timer2;
 	volatile unsigned short _t1, _t2;
+	byte _ticks;
 };
 
 #endif

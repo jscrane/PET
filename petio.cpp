@@ -39,6 +39,12 @@
 
 static petio *io;
 
+// 1ms internal clock tick
+#define TICK_FREQ	1000
+
+// 50Hz system interrupt frequency
+#define SYS_TICKS	20
+
 static void timer0isr(void) {
 	ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 	io->tick();
@@ -54,19 +60,22 @@ void petio::reset() {
 	ROM_IntEnable(INT_TIMER0A);
 	ROM_TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-	ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet() / 20);
+	ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet()/TICK_FREQ);
 	io = this;
 }
 
 void petio::tick() {
-	_irq.write(true);
+	if (_ticks++ == SYS_TICKS) {
+		_ticks = 0;
+		_irq.write(true);
+	}
 
 	if (_timer2) {
-		if (_t2 < 0x100) {
+		if (_t2 < 1000) {
 			_t2 = 0;
 			_timer2 = false;
 		} else
-			_t2 -= 0x100;
+			_t2 -= 1000;
 	}
 }
 
