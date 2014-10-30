@@ -37,8 +37,8 @@ void status(const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
   vsnprintf(tmp, sizeof(tmp), fmt, args);
-//  disp.clear();
-//  disp.error(tmp);
+  disp.clear();
+  disp.error(tmp);
   Serial.println(tmp);
   va_end(args);
 }
