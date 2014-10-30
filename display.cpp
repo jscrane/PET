@@ -25,8 +25,8 @@ static struct resolution {
 void display::_draw(Memory::address a, byte c)
 {
 	struct resolution &r = resolutions[_resolution];
-	int x = r.cw * (a % CHARS_PER_LINE - X_OFF);	// hack to view left edge of screen
-	if (x < 0 || x >= _dx)
+	unsigned x = r.cw * (a % CHARS_PER_LINE);
+	if (x >= _dx)
 		return;
 
 	unsigned y = (r.double_size? 2*r.ch: r.ch) * (a / CHARS_PER_LINE);
