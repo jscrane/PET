@@ -1,3 +1,4 @@
 - tape input
 - disk I/O
 - hang when scrolling vertically
+- map display properly (40 columns)
