@@ -13,19 +13,35 @@
 #include "kbd.h"
 #include "petio.h"
 
+#if defined(SERIES4_ROMS)
 #include "roms/basic4_b000.h"
 #include "roms/basic4_c000.h"
 #include "roms/basic4_d000.h"
 #include "roms/kernal4.h"
 #include "roms/edit4.h"
 
+#else
+#include "roms/basic2_c000.h"
+#include "roms/basic2_d000.h"
+#include "roms/kernal2.h"
+#include "roms/edit2.h"
+#endif
+
 static bool halted = false;
 
+#if defined(SERIES4_ROMS)
 prom basica(basic4_b000, 4096);
 prom basicb(basic4_c000, 4096);
 prom basicc(basic4_d000, 4096);
 prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
+
+#else
+prom basicb(basic2_c000, 4096);
+prom basicc(basic2_d000, 4096);
+prom kernal(kernal2, 4096);
+prom edit(edit2, 2048);
+#endif
 
 port irq;
 ram pages[RAM_SIZE / 1024];
@@ -51,7 +67,7 @@ char chkpt[] = { "CHKPOINT" };
 int cpid = 0;
 
 void reset() {
-  bool sd = hardware_init(cpu);
+  bool sd = hardware_reset();
 
   io.reset();
   disp.begin();
@@ -65,6 +81,7 @@ void reset() {
 
 void setup() {
   Serial.begin(115200);
+  hardware_init(cpu);
 
   for (int i = 0; i < RAM_SIZE; i += 1024)
     memory.put(pages[i / 1024], i);
@@ -73,7 +90,9 @@ void setup() {
   memory.put(disp, 0x8000);
   memory.put(io, 0xe800);
 
+#if defined(SERIES4_ROMS)
   memory.put(basica, 0xb000);
+#endif
   memory.put(basicb, 0xc000);
   memory.put(basicc, 0xd000);
   memory.put(edit, 0xe000);
