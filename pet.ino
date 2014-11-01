@@ -123,8 +123,7 @@ void loop() {
         disp.status(filename);
         break;
       case PS2_F4:
-        snprintf(buf, sizeof(buf), PROGRAMS"%s", filename);
-        if (io.load_prg(buf))
+        if (io.load_prg())
           snprintf(buf, sizeof(buf), "Loaded %s", filename);
         else
           snprintf(buf, sizeof(buf), "Failed to load %s", filename);

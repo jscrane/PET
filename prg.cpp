@@ -1,5 +1,4 @@
 #include <Energia.h>
-#include <SD.h>
 #include <hardware.h>
 #include <memory.h>
 #include <sdtape.h>
@@ -9,19 +8,17 @@
 #include "port.h"
 #include "petio.h"
 
-bool petio::load_prg(const char *filename)
+bool petio::load_prg()
 {
-	File file = SD.open(filename, O_READ);
-	if (!file)
+	if (!tape.more())
 		return false;
 
-	byte lo = file.read();
-	byte hi = file.read();
+	byte lo = tape.read();
+	byte hi = tape.read();
 
 	Memory::address a = lo + (hi << 8);
-	uint32_t n = file.size() - 2;
-	while (n--)
-		memory[a++] = (byte)file.read();
+	while (tape.more())
+		memory[a++] = tape.read();
 	
 	// based on mem_get/set_basic_text() from vice/petmem.c
 	memory[0xc7] = memory[0x28];
@@ -39,6 +36,5 @@ bool petio::load_prg(const char *filename)
 	memory[0x2f] = hi;
 	memory[0xca] = hi;
 	
-	file.close();
 	return true;
 }
