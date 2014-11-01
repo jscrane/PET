@@ -1,2 +1,1 @@
-- tape input
 - disk I/O
