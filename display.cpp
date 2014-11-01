@@ -27,6 +27,9 @@ void display::begin()
 
 void display::_draw(Memory::address a, byte c)
 {
+	if (a >= CHARS_PER_LINE * DISPLAY_LINES)
+		return;
+
 	struct resolution &r = resolutions[_resolution];
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
 	if (x >= _dx)
