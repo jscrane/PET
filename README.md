@@ -12,11 +12,12 @@ R-SHIFT)
   - ^Q = Down
   - ^] = Right
   - ^S = Home
+  - U ARROW = ^
 
 All of the firmware is from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/index.html).
 
-Currently this is pretty basic, there is no cassette or disk I/O to load
-programs. This is next on the TODO list.
-
 Function Keys:
 - F1 = reset
+- F2 = tape advance
+- F3 = tape rewind
+- F4 = load .prg file selected by tape
