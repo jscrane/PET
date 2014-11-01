@@ -1,3 +1,2 @@
 - tape input
 - disk I/O
-- map display properly (40 columns)
