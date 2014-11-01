@@ -107,7 +107,7 @@ void loop() {
     if (!ps2.isbreak())
       io.keyboard.down(key);
     else {
-      char cpbuf[32];
+      char buf[32];
       int n;
       File file;
       switch (key) {
@@ -122,23 +122,31 @@ void loop() {
         filename = io.tape.rewind();
         disp.status(filename);
         break;
+      case PS2_F4:
+        snprintf(buf, sizeof(buf), PROGRAMS"%s", filename);
+        if (io.load_prg(buf))
+          snprintf(buf, sizeof(buf), "Loaded %s", filename);
+        else
+          snprintf(buf, sizeof(buf), "Failed to load %s", filename);
+        disp.status(buf);
+        break;
       case PS2_F6:
         io.tape.stop();
-        snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s.%03d", chkpt, cpid++);
-        file = SD.open(cpbuf, O_WRITE | O_CREAT | O_TRUNC);
+        snprintf(buf, sizeof(buf), PROGRAMS"%s.%03d", chkpt, cpid++);
+        file = SD.open(buf, O_WRITE | O_CREAT | O_TRUNC);
         hardware_checkpoint(file);
         file.close();
         io.tape.start(PROGRAMS);
-        disp.status(cpbuf);
+        disp.status(buf);
         break;
       case PS2_F7:
         if (filename) {
           io.tape.stop();
-          snprintf(cpbuf, sizeof(cpbuf), PROGRAMS"%s", filename);
-          file = SD.open(cpbuf, O_READ);
+          snprintf(buf, sizeof(buf), PROGRAMS"%s", filename);
+          file = SD.open(buf, O_READ);
           hardware_restore(file);
           file.close();
-          n = sscanf(cpbuf + strlen(PROGRAMS), "%[A-Z0-9].%d", chkpt, &cpid);
+          n = sscanf(buf + strlen(PROGRAMS), "%[A-Z0-9].%d", chkpt, &cpid);
           cpid = (n == 1)? 0: cpid+1;
           io.tape.start(PROGRAMS);
         }
