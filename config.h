@@ -5,6 +5,7 @@
 #define TFT_BG		VGA_BLACK
 #define TFT_FG		VGA_LIME
 #define CHARS_PER_LINE  40
+#define DISPLAY_LINES	25
 #define DISPLAY_RAM_SIZE	0x0400
 
 // RAM provided by uC (must be a multiple of 1024)

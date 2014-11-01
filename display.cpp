@@ -8,19 +8,22 @@
 #include "display.h"
 #include "roms/characters_vic20.h"
 
+static struct resolution {
+	const char *name;
+	unsigned cw, ch;
+} resolutions[] = {
+	{"40x25", 8, 8},
+};
+
 void display::begin()
 {
 	UTFTDisplay::begin(TFT_BG, TFT_FG);
 	clear();
-}
 
-static struct resolution {
-	const char *name;
-	unsigned cw, ch;
-	boolean double_size;
-} resolutions[] = {
-	{"40x25", 8, 8, false},
-};
+	struct resolution &r = resolutions[_resolution];
+	unsigned dh = DISPLAY_LINES * r.ch;
+	_yoff = _dy < dh? 0: (_dy - dh) / 2;
+}
 
 void display::_draw(Memory::address a, byte c)
 {
@@ -29,23 +32,19 @@ void display::_draw(Memory::address a, byte c)
 	if (x >= _dx)
 		return;
 
-	unsigned y = (r.double_size? 2*r.ch: r.ch) * (a / CHARS_PER_LINE);
+	unsigned y = r.ch * (a / CHARS_PER_LINE) + _yoff;
 	if (y >= _dy)
 		return;
 
 	unsigned short ch = c;
 	if (_upr.read())
 		ch += 256;
-	for (unsigned i = 0; i < r.ch; i++) {
-		byte b = charset[ch][i];
-		for (unsigned j = 0; j < r.cw; j++) {
-			int _cx = x + r.cw - j;
-			utft.setColor((b & (1 << j))? TFT_FG: TFT_BG);
-			if (r.double_size) {
-				utft.drawPixel(_cx, y + 2*i);
-				utft.drawPixel(_cx, y + 2*i + 1);
-			} else
-				utft.drawPixel(_cx, y + i);
+	for (unsigned j = 0; j < r.ch; j++) {
+		byte b = charset[ch][j];
+		for (unsigned i = 0; i < r.cw; i++) {
+			int _cx = x + r.cw - i;
+			utft.setColor((b & (1 << i))? TFT_FG: TFT_BG);
+			utft.drawPixel(_cx, y + j);
 		}
 	}
 }
