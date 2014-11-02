@@ -19,14 +19,21 @@ public:
 	sdtape tape;
 	kbd keyboard;
 
+	// loads the file currently selected by tape
+	bool load_prg();
 private:
 	void write(byte b);
 	byte read();
 
 	port &_irq;
+	byte _ticks;
+
+	// via
 	volatile bool _timer1, _timer2;
 	volatile unsigned short _t1, _t2;
-	byte _ticks;
+	unsigned short _t1_latch;
+	byte _ier, _ifr, _ddra, _ddrb;
+	volatile byte _porta, _portb;
 };
 
 #endif

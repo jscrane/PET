@@ -2,6 +2,7 @@
 #include <keyboard.h>
 #include "kbd.h"
 
+// http://www.computer-engineering.org/ps2keyboard/scancodes2.html
 // maps scan codes to pet rows/cols
 // map L-GUI to LSHIFT and R-GUI to RSHIFT
 static const byte scanmap[128] = {

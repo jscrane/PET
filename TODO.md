@@ -1,1 +1,4 @@
 - disk I/O
+- stuck shifted keys (see uk101 fix)
+- invaders hangs when shoot one (sound effect?)
+- spiram instability

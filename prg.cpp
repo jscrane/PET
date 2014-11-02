@@ -1,4 +1,3 @@
-#include <Energia.h>
 #include <hardware.h>
 #include <memory.h>
 #include <sdtape.h>
@@ -15,7 +14,6 @@ bool petio::load_prg()
 
 	byte lo = tape.read();
 	byte hi = tape.read();
-
 	Memory::address a = lo + (hi << 8);
 	while (tape.more())
 		memory[a++] = tape.read();
