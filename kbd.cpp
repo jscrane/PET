@@ -3,6 +3,8 @@
 #include "kbd.h"
 
 // http://www.computer-engineering.org/ps2keyboard/scancodes2.html
+// and http://www.6502.org/users/andre/petindex/keyboards.html
+
 // maps scan codes to pet rows/cols
 // (map L-GUI to LSHIFT and R-GUI to RSHIFT)
 static const byte scanmap[128] = {
@@ -20,7 +22,7 @@ static const byte scanmap[128] = {
 	0xff, 0x85, 0x65, 0x82, 0xff, 0x01, 0xff, 0xff, // 0x58
 	0x13, 0xff, 0xff, 0xff, 0xff, 0x05, 0x17, 0xff, // 0x60
 	0xff, 0x66, 0xff, 0x46, 0x26, 0xff, 0xff, 0xff, // 0x68
-	0x86, 0x96, 0x76, 0x56, 0x47, 0x36, 0xff, 0xff, // 0x70
+	0x86, 0x96, 0x76, 0x56, 0x47, 0x36, 0xff, 0x25, // 0x70
 	0xff, 0x77, 0x67, 0x87, 0x57, 0x27, 0xff, 0xff, // 0x78
 };
 
@@ -101,11 +103,14 @@ void kbd::_set(byte k) {
 }
 
 void kbd::down(byte scan) {
-	if (isshift(scan))
+	if (isshift(scan)) {
+		// reset any depressed keys so they don't get stuck
+		reset();
 		_shift = true;
-	else if (isctrl(scan))
+	} else if (isctrl(scan)) {
+		reset();
 		_ctrl = true;
-	else {
+	} else {
 		byte k = _map(scan);
 		if (k != 0xff)
 			_set(k);
@@ -113,7 +118,8 @@ void kbd::down(byte scan) {
 }
 
 void kbd::reset() {
-	for (int i = 10; i--; )
+	for (int i = sizeof(_rows); i--; )
 		_rows[i] = 0;
 	_ctrl = false;
+	_shift = false;
 }

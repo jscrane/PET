@@ -12,7 +12,8 @@ R-SHIFT)
   - ^Q = Down
   - ^] = Right
   - ^S = Home
-  - U ARROW = ^
+  - NUM = ^
+- the numeric keypad is mapped
 
 All of the firmware is from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/index.html).
 
