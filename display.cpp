@@ -40,7 +40,7 @@ void display::_draw(Memory::address a, byte c)
 		return;
 
 	unsigned short ch = c;
-	if (_upr.read())
+	if (!_upr.read())
 		ch += 256;
 	for (unsigned j = 0; j < r.ch; j++) {
 		byte b = charset[ch][j];
