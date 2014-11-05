@@ -10,7 +10,7 @@
 
 static struct resolution {
 	const char *name;
-	unsigned cw, ch;
+	const unsigned cw, ch;
 } resolutions[] = {
 	{"40x25", 8, 8},
 };
@@ -32,12 +32,7 @@ void display::_draw(Memory::address a, byte c)
 
 	struct resolution &r = resolutions[_resolution];
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
-	if (x >= _dx)
-		return;
-
 	unsigned y = r.ch * (a / CHARS_PER_LINE) + _yoff;
-	if (y >= _dy)
-		return;
 
 	unsigned short ch = c, cm = _mem[a];
 	if (!_upr.read()) {
@@ -45,17 +40,42 @@ void display::_draw(Memory::address a, byte c)
 		cm += 256;
 	}
 	for (unsigned j = 0; j < r.ch; j++) {
-		byte b = charset[ch][j];
-		byte m = charset[cm][j];
-		if (b != m)
-			for (unsigned i = 0; i < r.cw; i++) {
-				unsigned bit = (1 << i);
-				if ((b & bit) != (m & bit)) {
-					int cx = x + r.cw - i;
-					utft.setColor((b & (1 << i))? TFT_FG: TFT_BG);
-					utft.drawPixel(cx, y + j);
-				}
+		byte b = charset[ch][j], m = charset[cm][j];
+		if (b != m) {
+			byte d = (b ^ m);
+			if (d & 1) {
+				utft.setColor((b & 1)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 7, y + j);
 			}
+			if (d & 2) {
+				utft.setColor((b & 2)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 6, y + j);
+			}
+			if (d & 4) {
+				utft.setColor((b & 4)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 5, y + j);
+			}
+			if (d & 8) {
+				utft.setColor((b & 8)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 4, y + j);
+			}
+			if (d & 16) {
+				utft.setColor((b & 16)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 3, y + j);
+			}
+			if (d & 32) {
+				utft.setColor((b & 32)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 2, y + j);
+			}
+			if (d & 64) {
+				utft.setColor((b & 64)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 1, y + j);
+			}
+			if (d & 128) {
+				utft.setColor((b & 128)? TFT_FG: TFT_BG);
+				utft.drawPixel(x + 0, y + j);
+			}
+		}
 	}
 }
 
