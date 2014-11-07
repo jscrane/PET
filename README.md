@@ -14,6 +14,7 @@ R-SHIFT)
   - ^S = Home
   - NUM = ^
 - the numeric keypad is mapped
+- HOME/END/INS/DEL and the arrow keys are mapped (END == CLR)
 
 All of the firmware is from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/index.html).
 

@@ -87,7 +87,31 @@ void kbd::_reset(byte k) {
 }
 
 void kbd::up(byte scan) {
-	if (isshift(scan))
+	if (_ext) {
+		_ext = false;
+		switch(scan) {
+		case 0x69:	// end
+			_reset(0x80);
+		case 0x6c:	// home
+			_reset(0x06);
+			break;
+		case 0x75:	// up
+			_reset(0x80);
+		case 0x72:	// down
+			_reset(0x16);
+			break;
+		case 0x6b:	// left
+			_reset(0x80);
+		case 0x74:	// right
+			_reset(0x07);
+			break;
+		case 0x70:	// ins
+			_reset(0x80);
+		case 0x71:	// del
+			_reset(0x17);
+			break;
+		}
+	} else if (isshift(scan))
 		_shift = false;
 	else if (isctrl(scan))
 		_ctrl = false;
@@ -103,7 +127,33 @@ void kbd::_set(byte k) {
 }
 
 void kbd::down(byte scan) {
-	if (isshift(scan)) {
+	if (scan == 0xe0)
+		_ext = true;
+	else if (_ext) {
+		_ext = false;
+		switch(scan) {
+		case 0x69:	// end
+			_set(0x80);
+		case 0x6c:	// home
+			_set(0x06);
+			break;
+		case 0x75:	// up
+			_set(0x80);
+		case 0x72:	// down
+			_set(0x16);
+			break;
+		case 0x6b:	// left
+			_set(0x80);
+		case 0x74:	// right
+			_set(0x07);
+			break;
+		case 0x70:	// ins
+			_set(0x80);
+		case 0x71:	// del
+			_set(0x17);
+			break;
+		}
+	} else if (isshift(scan)) {
 		// reset any depressed keys so they don't get stuck
 		reset();
 		_shift = true;

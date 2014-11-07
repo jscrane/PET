@@ -19,7 +19,7 @@ private:
 	byte _rows[10];
 	byte pattern();
 	byte _row;
-	bool _ctrl, _shift;
+	bool _ctrl, _shift, _ext;
 };
 
 #endif
