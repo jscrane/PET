@@ -64,14 +64,6 @@ static const byte ctrlmap[128] = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // 0x78
 };
 
-static bool isshift(byte scan) {
-	return scan == 0x12 || scan == 0x59;
-}
-
-static bool isctrl(byte scan) {
-	return scan == 0x14;
-}
-
 byte kbd::_map(byte scan) {
 	if (_shift)
 		return shiftmap[scan];

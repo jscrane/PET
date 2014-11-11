@@ -1,7 +1,7 @@
-#include <hardware.h>
 #include <memory.h>
 #include <sdtape.h>
 #include <keyboard.h>
+#include <hardware.h>
 
 #include "kbd.h"
 #include "port.h"
