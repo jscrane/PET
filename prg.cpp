@@ -2,6 +2,7 @@
 #include <sdtape.h>
 #include <keyboard.h>
 #include <hardware.h>
+#include <timed.h>
 
 #include "kbd.h"
 #include "port.h"

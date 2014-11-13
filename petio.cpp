@@ -1,13 +1,8 @@
 #include <Energia.h>
-#include <stdint.h>
-#include <inc/hw_ints.h>
-#include <driverlib/interrupt.h>
-#include <driverlib/sysctl.h>
-#include <driverlib/timer.h>
-
 #include <memory.h>
 #include <keyboard.h>
 #include <sdtape.h>
+#include <timed.h>
 
 #include "port.h"
 #include "kbd.h"
@@ -48,23 +43,10 @@ static petio *io;
 // 50Hz system interrupt frequency
 #define SYS_TICKS	20
 
-static void timer0isr(void) {
-	ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-	io->tick();
-}
-
 void petio::reset() {
 	keyboard.reset();
 
-	ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
-	ROM_TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-	TimerIntRegister(TIMER0_BASE, TIMER_A, timer0isr);
-	ROM_TimerEnable(TIMER0_BASE, TIMER_A);
-	ROM_IntEnable(INT_TIMER0A);
-	ROM_TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-	ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet()/TICK_FREQ);
-	io = this;
+	timer_create(TICK_FREQ, this);
 }
 
 #define IER_MASTER	0x80
@@ -76,7 +58,7 @@ void petio::reset() {
 #define IER_CA1_ACTIVE	0x02
 #define IER_CA2_ACTIVE	0x01
 
-void petio::tick() {
+bool petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
 		_portb |= 0x20;
@@ -94,25 +76,22 @@ void petio::tick() {
 			_t2 -= 1000;
 	}
 	// FIXME: timer1
+	return true;
 }
 
 static void print(const char *msg, Memory::address a)
 {
-/*
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.println(a, 16);
-*/
 }
 
 static void print(const char *msg, Memory::address a, byte r) {
-/*
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.print(a, 16);
 	Serial.print(' ');
 	Serial.println(r, 16);
-*/
 }
 
 byte petio::read() {
@@ -191,14 +170,14 @@ byte petio::read() {
 		print(" <??? ", _acc);
 		break;
 	}
-if (VIA <= _acc && _acc <= VIA + 0x0f)
+if (VIA < _acc && _acc <= VIA + 0x0f)
 	print(" <via ", _acc, r);
 
 	return r;
 }
 
 void petio::write(byte r) {
-if (VIA <= _acc && _acc <= VIA + 0x0f)
+if (VIA < _acc && _acc <= VIA + 0x0f)
 	print(" >via ", _acc, r);
 
 	switch (_acc) {

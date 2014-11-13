@@ -2,4 +2,4 @@
 - invaders hangs when shoot one (sound effect?)
 - spiram instability (but swapping CS lines around now works)
 - shorten SPI cabling
-- try with -funroll-loops for display
+- use new timer_create() call

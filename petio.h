@@ -5,14 +5,14 @@ class port;
 
 // this occupies all of the addresses (and more) dedicated to the 
 // two PIAs and the VIA
-class petio: public Memory::Device {
+class petio: public Memory::Device, Timed {
 public:
 	void operator= (byte b) { write(b); }
 	operator byte() { return read(); }
 
 	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0) {}
 	void reset();
-	void tick();
+	virtual bool tick();
 
 	port CA2;
 
