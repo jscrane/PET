@@ -63,8 +63,6 @@ jmp_buf ex;
 r6502 cpu(&memory, &ex, status);
 
 const char *filename;
-char chkpt[] = { "CHKPOINT" };
-int cpid = 0;
 
 void reset() {
   bool sd = hardware_reset();
@@ -108,8 +106,6 @@ void loop() {
       io.keyboard.down(key);
     else {
       char buf[32];
-      int n;
-      File file;
       switch (key) {
       case PS2_F1:
         reset();
@@ -130,25 +126,11 @@ void loop() {
         disp.status(buf);
         break;
       case PS2_F6:
-        io.tape.stop();
-        snprintf(buf, sizeof(buf), PROGRAMS"%s.%03d", chkpt, cpid++);
-        file = SD.open(buf, O_WRITE | O_CREAT | O_TRUNC);
-        hardware_checkpoint(file);
-        file.close();
-        io.tape.start(PROGRAMS);
-        disp.status(buf);
+        disp.status(checkpoint(io.tape, PROGRAMS));
         break;
       case PS2_F7:
-        if (filename) {
-          io.tape.stop();
-          snprintf(buf, sizeof(buf), PROGRAMS"%s", filename);
-          file = SD.open(buf, O_READ);
-          hardware_restore(file);
-          file.close();
-          n = sscanf(buf + strlen(PROGRAMS), "%[A-Z0-9].%d", chkpt, &cpid);
-          cpid = (n == 1)? 0: cpid+1;
-          io.tape.start(PROGRAMS);
-        }
+        if (filename)
+          restore(io.tape, PROGRAMS, filename);
         break;
       default:
         io.keyboard.up(key);
