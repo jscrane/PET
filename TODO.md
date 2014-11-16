@@ -1,4 +1,2 @@
 - disk I/O
 - invaders hangs when shoot one (sound effect?)
-- spiram instability (but swapping CS lines around now works)
-- shorten SPI cabling
