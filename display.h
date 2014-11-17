@@ -1,7 +1,7 @@
 #ifndef _DISPLAY_H
 #define _DISPLAY_H
 
-class display: public UTFTDisplay {
+class display: public UTFTDisplay, public Memory::Device {
 public:
 	virtual void operator= (byte c) { _set(_acc, c); }
 	virtual operator byte () { return _mem[_acc]; }
@@ -9,7 +9,7 @@ public:
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
 
-	display(port &upr): UTFTDisplay(sizeof(_mem)), _resolution(0), _upr(upr) {}
+	display(port &upr): Memory::Device(sizeof(_mem)), _resolution(0), _upr(upr) {}
 	void begin();
 
 private:
