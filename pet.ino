@@ -3,6 +3,7 @@
 #include <UTFT.h>
 #include <SD.h>
 #include <r65emu.h>
+#include <r6502.h>
 
 #include <setjmp.h>
 #include <stdarg.h>
