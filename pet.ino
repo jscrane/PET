@@ -102,8 +102,9 @@ void setup() {
 
 void loop() {
 	if (ps2.available()) {
-		unsigned key = ps2.read();
-		if (!ps2.isbreak())
+		unsigned scan = ps2.read2();
+		byte key = scan & 0xff;
+		if (scan < 0x100)
 			io.keyboard.down(key);
 		else {
 			char buf[32];
