@@ -5,7 +5,6 @@
 #include <r65emu.h>
 #include <r6502.h>
 
-#include <setjmp.h>
 #include <stdarg.h>
 
 #include "config.h"
@@ -28,8 +27,6 @@
 #include "roms/edit2.h"
 #endif
 
-static bool halted = false;
-
 #if defined(SERIES4_ROMS)
 prom basica(basic4_b000, 4096);
 prom basicb(basic4_c000, 4096);
@@ -48,20 +45,7 @@ port irq;
 ram pages[RAM_SIZE / 1024];
 petio io(irq);
 display disp(io.CA2);
-
-void status(const char *fmt, ...) {
-	char tmp[256];
-	va_list args;
-	va_start(args, fmt);
-	vsnprintf(tmp, sizeof(tmp), fmt, args);
-	disp.clear();
-	disp.error(tmp);
-	Serial.println(tmp);
-	va_end(args);
-}
-
-jmp_buf ex;
-r6502 cpu(memory, ex, status);
+r6502 cpu(memory);
 
 const char *filename;
 
@@ -74,8 +58,6 @@ void reset() {
 		io.tape.start(PROGRAMS);
 	else
 		disp.status("No SD Card");
-
-	halted = (setjmp(ex) != 0);
 }
 
 void setup() {
@@ -139,7 +121,7 @@ void loop() {
 				break;
 			}
 		}
-	} else if (!halted) {
+	} else if (!cpu.halted()) {
 		cpu.run(CPU_INSTRUCTIONS);
 		if (irq.read()) {
 			irq.write(false);
