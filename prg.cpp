@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <memory.h>
 #include <sdtape.h>
 #include <keyboard.h>
@@ -13,8 +14,8 @@ bool petio::load_prg()
 	if (!tape.more())
 		return false;
 
-	byte lo = tape.read();
-	byte hi = tape.read();
+	uint8_t lo = tape.read();
+	uint8_t hi = tape.read();
 	Memory::address a = lo + (hi << 8);
 	while (tape.more())
 		memory[a++] = tape.read();
@@ -23,13 +24,13 @@ bool petio::load_prg()
 	memory[0xc7] = memory[0x28];
 	memory[0xc8] = memory[0x29];
 
-	lo = (byte)(a & 0xff);
+	lo = (uint8_t)(a & 0xff);
 	memory[0x2a] = lo;
 	memory[0x2c] = lo;
 	memory[0x2e] = lo;
 	memory[0xc9] = lo;
 
-	hi = (byte)(a >> 8);
+	hi = (uint8_t)(a >> 8);
 	memory[0x2b] = hi;
 	memory[0x2d] = hi;
 	memory[0x2f] = hi;

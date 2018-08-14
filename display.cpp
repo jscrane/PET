@@ -25,7 +25,7 @@ void display::begin()
 	_yoff = _dy < dh? 0: (_dy - dh) / 2;
 }
 
-void display::_draw(Memory::address a, byte c)
+void display::_draw(Memory::address a, uint8_t c)
 {
 	if (a >= CHARS_PER_LINE * DISPLAY_LINES)
 		return;
@@ -40,9 +40,9 @@ void display::_draw(Memory::address a, byte c)
 		cm += 256;
 	}
 	for (unsigned j = 0; j < r.ch; j++) {
-		byte b = charset[ch][j], m = charset[cm][j];
+		uint8_t b = charset[ch][j], m = charset[cm][j];
 		if (b != m) {
-			byte d = (b ^ m);
+			uint8_t d = (b ^ m);
 			if (d & 1) {
 				utft.setColor((b & 1)? TFT_FG: TFT_BG);
 				utft.drawPixel(x + 7, y + j);

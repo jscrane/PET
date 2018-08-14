@@ -85,7 +85,7 @@ void setup() {
 void loop() {
 	if (ps2.available()) {
 		unsigned scan = ps2.read2();
-		byte key = scan & 0xff;
+		uint8_t key = scan & 0xff;
 		if (is_down(scan))
 			io.keyboard.down(key);
 		else {

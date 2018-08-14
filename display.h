@@ -3,8 +3,8 @@
 
 class display: public UTFTDisplay, public Memory::Device {
 public:
-	virtual void operator= (byte c) { _set(_acc, c); }
-	virtual operator byte () { return _mem[_acc]; }
+	virtual void operator= (uint8_t c) { _set(_acc, c); }
+	virtual operator uint8_t () { return _mem[_acc]; }
 
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
@@ -13,12 +13,12 @@ public:
 	void begin();
 
 private:
-	inline void _set(Memory::address a, byte c) {
+	inline void _set(Memory::address a, uint8_t c) {
 		if (c != _mem[a]) { _draw(a, c); _mem[a] = c; }
 	}
-	void _draw(Memory::address a, byte c);
+	void _draw(Memory::address a, uint8_t c);
 
-	byte _mem[DISPLAY_RAM_SIZE];
+	uint8_t _mem[DISPLAY_RAM_SIZE];
 	int _resolution, _yoff;
 	port &_upr;
 };

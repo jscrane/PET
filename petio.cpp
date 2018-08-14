@@ -1,4 +1,4 @@
-#include <Energia.h>
+#include <Arduino.h>
 #include <memory.h>
 #include <keyboard.h>
 #include <sdtape.h>
@@ -86,7 +86,7 @@ static void print(const char *msg, Memory::address a)
 	Serial.println(a, 16);
 }
 
-static void print(const char *msg, Memory::address a, byte r) {
+static void print(const char *msg, Memory::address a, uint8_t r) {
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.print(a, 16);
@@ -94,8 +94,8 @@ static void print(const char *msg, Memory::address a, byte r) {
 	Serial.println(r, 16);
 }
 
-byte petio::read() {
-	byte r = 0x00;
+uint8_t petio::read() {
+	uint8_t r = 0x00;
 
 	switch (_acc) {
 	// keyboard in
@@ -176,7 +176,7 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 	return r;
 }
 
-void petio::write(byte r) {
+void petio::write(uint8_t r) {
 if (VIA < _acc && _acc <= VIA + 0x0f)
 	print(" >via ", _acc, r);
 
