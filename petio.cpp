@@ -48,7 +48,7 @@ void petio::reset() {
 
 	keyboard.reset();
 
-	timer_create(TICK_FREQ, petio::tick);
+	timer_create(TICK_FREQ, petio::on_tick);
 }
 
 #define IER_MASTER	0x80
@@ -60,22 +60,26 @@ void petio::reset() {
 #define IER_CA1_ACTIVE	0x02
 #define IER_CA2_ACTIVE	0x01
 
+void IRAM_ATTR petio::on_tick() {
+	io->tick();
+}
+
 void IRAM_ATTR petio::tick() {
-	if (io->_ticks++ == SYS_TICKS) {
-		io->_ticks = 0;
-		io->_portb |= 0x20;
-		io->_irq.write(true);
+	if (_ticks++ == SYS_TICKS) {
+		_ticks = 0;
+		_portb |= 0x20;
+		_irq.write(true);
 	}
 
-	if (io->_timer2) {
-		if (io->_t2 < 1000) {
-			io->_t2 = 0;
-			io->_timer2 = false;
-			io->_ifr |= IER_TIMER2;
-			if ((io->_ier & IER_MASTER) && (io->_ier & IER_TIMER2))
-				io->_irq.write(true);
+	if (_timer2) {
+		if (_t2 < 1000) {
+			_t2 = 0;
+			_timer2 = false;
+			_ifr |= IER_TIMER2;
+			if ((_ier & IER_MASTER) && (_ier & IER_TIMER2))
+				_irq.write(true);
 		} else
-			io->_t2 -= 1000;
+			_t2 -= 1000;
 	}
 	// FIXME: timer1
 }
