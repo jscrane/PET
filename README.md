@@ -18,7 +18,7 @@ R-SHIFT)
 
 All of the firmware is from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/index.html).
 
-There are some nice games at [awesome.commodore.me](http://awesome.commodore.me/pet/pet-games/) as well as [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/pet/games/english/index.html).
+There are some nice games at -[awesome.commodore.me](http://awesome.commodore.me/pet/pet-games/)- as well as [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/pet/games/english/index.html).
 
 Function Keys:
 - F1 = reset
