@@ -55,10 +55,10 @@ void reset() {
 
 	io.reset();
 	disp.begin();
-	if (sd)
-		io.tape.start(PROGRAMS);
-	else
+	if (!sd)
 		disp.status("No SD Card");
+	else if (!io.tape.start(PROGRAMS))
+		disp.status("Failed to open "PROGRAMS);
 }
 
 void setup() {
@@ -99,11 +99,11 @@ void loop() {
 				break;
 			case PS2_F2:
 				filename = io.tape.advance();
-				disp.status(filename);
+				disp.status(filename? filename: "No file");
 				break;
 			case PS2_F3:
 				filename = io.tape.rewind();
-				disp.status(filename);
+				disp.status(filename? filename: "No file");
 				break;
 			case PS2_F4:
 				if (io.load_prg())

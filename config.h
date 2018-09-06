@@ -19,7 +19,8 @@
 #define CPU_INSTRUCTIONS  750
 
 // where programs and images are stored
-#define PROGRAMS        "/pet/"
+//#define PROGRAMS        "/pet/"
+#define PROGRAMS        "/"
 
 // rom set
 #define SERIES4_ROMS
