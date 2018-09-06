@@ -1,8 +1,8 @@
-PET-Energia
-===========
+PET
+===
 
-An implementation of the Commodore PET on the same hardware configuration
-as the UK101-Energia.
+An emulation of the Commodore PET on the same hardware configuration
+as the [UK101](https://github.com/jscrane/UK101).
 
 This PET emulates the graphics keyboard:
 - graphics characters are produced with L-GUI and R-GUI (instead of L-SHIFT and 
