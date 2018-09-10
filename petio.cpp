@@ -72,14 +72,14 @@ void IRAM_ATTR petio::tick() {
 	}
 
 	if (_timer2) {
-		if (_t2 < 1000) {
+		if (_t2 < TICK_FREQ) {
 			_t2 = 0;
 			_timer2 = false;
 			_ifr |= IER_TIMER2;
 			if ((_ier & IER_MASTER) && (_ier & IER_TIMER2))
 				_irq.write(true);
 		} else
-			_t2 -= 1000;
+			_t2 -= TICK_FREQ;
 	}
 	// FIXME: timer1
 }
@@ -131,6 +131,10 @@ uint8_t petio::read() {
 	case VIA + VPORTB:
 		// screen retrace in
 		//r = ((0xff - 0x20) & ~_ddrb);
+		break;
+
+	case VIA + SHIFT:
+		print(" shift ", _acc);
 		break;
 
 	case VIA + ACR:
@@ -212,6 +216,10 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 
 	case VIA + DDRA:
 		_ddra = r;
+		break;
+
+	case VIA + SHIFT:
+		print(" shift ", _acc, r);
 		break;
 
 	case VIA + ACR:
