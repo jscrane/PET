@@ -1,6 +1,7 @@
 *.o
 .lib
 libcore.a
-pet.elf
-pet.bin
-.*.d
+*.elf
+*.bin
+*.d
+*.img
