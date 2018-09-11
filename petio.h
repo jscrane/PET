@@ -22,6 +22,7 @@ public:
 
 	// loads the file currently selected by tape
 	bool load_prg();
+
 private:
 	void tick();
 
@@ -30,6 +31,12 @@ private:
 
 	port &_irq;
 	uint8_t _ticks;
+
+	// sound
+	void sound_on();
+	void sound_off();
+	void sound_freq(uint8_t);
+	void sound_octave(uint8_t);
 
 	// via
 	volatile bool _timer1, _timer2;
