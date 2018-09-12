@@ -86,6 +86,10 @@ void setup() {
 }
 
 void loop() {
+#if defined(CPU_DEBUG)
+	static bool cpu_debug;
+#endif
+
 	if (ps2.available()) {
 		unsigned scan = ps2.read2();
 		uint8_t key = scan & 0xff;
@@ -119,13 +123,27 @@ void loop() {
 				if (filename)
 					restore(io.tape, PROGRAMS, filename);
 				break;
+#if defined(CPU_DEBUG)
+			case PS2_F10:
+				cpu_debug = !cpu_debug;
+				break;
+#endif
 			default:
 				io.keyboard.up(key);
 				break;
 			}
 		}
 	} else if (!cpu.halted()) {
+#if defined(CPU_DEBUG)
+		if (cpu_debug) {
+			char buf[256];
+			Serial.println(cpu.status(buf, sizeof(buf), false));
+			cpu.run(1);
+		} else
+			cpu.run(CPU_INSTRUCTIONS);
+#else
 		cpu.run(CPU_INSTRUCTIONS);
+#endif
 		if (irq.read()) {
 			irq.write(false);
 			cpu.raise(0);
