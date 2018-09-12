@@ -37,6 +37,18 @@
 #define IFR	0x0d
 #define IER	0x0e
 
+#define IER_MASTER	0x80
+#define IER_TIMER1	0x40
+#define IER_TIMER2	0x20
+#define IER_CB1_ACTIVE	0x10
+#define IER_CB2_ACTIVE	0x08
+#define IER_SHIFT_REG	0x04
+#define IER_CA1_ACTIVE	0x02
+#define IER_CA2_ACTIVE	0x01
+
+#define VIA_VIDEO_RETRACE	0x20
+#define VIA_ACR_SHIFT_MASK	0x1c
+
 static petio *io;
 
 // 1ms internal clock tick
@@ -50,6 +62,9 @@ static PWM pwm;
 void petio::reset() {
 	io = this;
 
+	_ifr = 0x00;
+	_ier = IER_MASTER;
+
 	keyboard.reset();
 #if defined(PWM_SOUND)
 	pwm.begin(PWM_SOUND);
@@ -57,17 +72,6 @@ void petio::reset() {
 
 	timer_create(TICK_FREQ, petio::on_tick);
 }
-
-#define IER_MASTER	0x80
-#define IER_TIMER1	0x40
-#define IER_TIMER2	0x20
-#define IER_CB1_ACTIVE	0x10
-#define IER_CB2_ACTIVE	0x08
-#define IER_SHIFT_REG	0x04
-#define IER_CA1_ACTIVE	0x02
-#define IER_CA2_ACTIVE	0x01
-
-#define VIA_VIDEO_RETRACE	0x20
 
 void IRAM_ATTR petio::on_tick() {
 	io->tick();
@@ -250,9 +254,9 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 
 	case VIA + ACR:
 		print(" acr ", _acc, r);
-		if ((r & 0x1c) == 0x10)
+		if ((r & VIA_ACR_SHIFT_MASK) == 0x10)
 			sound_on();
-		else
+		else if (!(r & VIA_ACR_SHIFT_MASK))
 			sound_off();
 		break;
 
