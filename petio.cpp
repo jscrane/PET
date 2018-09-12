@@ -4,6 +4,7 @@
 #include <sdtape.h>
 #include <timed.h>
 #include <sound_pwm.h>
+#include <hardware.h>
 
 #include "port.h"
 #include "kbd.h"
@@ -301,7 +302,9 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 }
 
 void petio::sound_on() {
+#if defined(PWM_DUTY)
 	pwm.set_duty(PWM_DUTY);
+#endif
 }
 
 void petio::sound_off() {
