@@ -67,6 +67,8 @@ void petio::reset() {
 #define IER_CA1_ACTIVE	0x02
 #define IER_CA2_ACTIVE	0x01
 
+#define VIA_VIDEO_RETRACE	0x20
+
 void IRAM_ATTR petio::on_tick() {
 	io->tick();
 }
@@ -74,9 +76,10 @@ void IRAM_ATTR petio::on_tick() {
 void IRAM_ATTR petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
-		_portb |= 0x20;
+		_portb |= VIA_VIDEO_RETRACE;
 		_irq.write(true);
-	}
+	} else
+		_portb &= ~VIA_VIDEO_RETRACE;
 
 	if (_timer1) {
 		if (_t1 < TICK_FREQ) {
@@ -148,7 +151,7 @@ uint8_t petio::read() {
 
 	case VIA + VPORTB:
 		// screen retrace in
-		//r = ((0xff - 0x20) & ~_ddrb);
+		r = _portb;
 		_ifr &= ~(IER_CB1_ACTIVE | IER_CB2_ACTIVE);
 		break;
 
