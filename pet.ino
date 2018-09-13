@@ -62,7 +62,9 @@ void reset() {
 }
 
 void setup() {
+#if defined(DEBUG) || defined(CPU_DEBUG)
 	Serial.begin(115200);
+#endif
 	hardware_init(cpu);
 
 	for (int i = 0; i < RAM_SIZE; i += 1024)
@@ -137,7 +139,7 @@ void loop() {
 #if defined(CPU_DEBUG)
 		if (cpu_debug) {
 			char buf[256];
-			Serial.println(cpu.status(buf, sizeof(buf), false));
+			Serial.println(cpu.status(buf, sizeof(buf)));
 			cpu.run(1);
 		} else
 			cpu.run(CPU_INSTRUCTIONS);
