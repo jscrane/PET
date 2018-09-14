@@ -48,6 +48,7 @@
 
 #define VIA_VIDEO_RETRACE	0x20
 #define VIA_ACR_SHIFT_MASK	0x1c
+#define VIA_ACR_T1_CONTINUOUS	0x40
 
 static petio *io;
 
@@ -62,8 +63,9 @@ static PWM pwm;
 void petio::reset() {
 	io = this;
 
-	_ifr = 0x00;
-	_ier = IER_MASTER;
+	_acr = _ifr = _ier = 0x00;
+	_t1 = _t2 = 0;
+	_timer1 = _timer2 = false;
 
 	keyboard.reset();
 #if defined(PWM_SOUND)
@@ -167,6 +169,12 @@ uint8_t petio::read() {
 	case VIA + ACR:
 		print(" acr ", _acc);
 		// acr bits 5-7 relate to timers
+		r = _acr;
+		break;
+
+	case VIA + IER:
+		print(" ifr ", _acc);
+		r = _ier | 0x80;
 		break;
 
 	case VIA + IFR:
@@ -254,14 +262,20 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 
 	case VIA + ACR:
 		print(" acr ", _acc, r);
+		_acr = r;
 		if ((r & VIA_ACR_SHIFT_MASK) == 0x10)
 			sound_on();
 		else if (!(r & VIA_ACR_SHIFT_MASK))
 			sound_off();
+		if (r & VIA_ACR_T1_CONTINUOUS)
+			_timer1 = true;
 		break;
 
 	case VIA + IER:
-		_ier = r;
+		if (r & 0x80)
+			_ier |= r & 0x7f;
+		else
+			_ier &= ~(r & 0x7f);
 		break;
 
 	case VIA + IFR:
@@ -269,24 +283,19 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 		break;
 
 	case VIA + T1LO:
-		_t1 = r;
-		_timer1 = false;
+	case VIA + T1LLO:
+		_t1_latch = (_t1_latch & 0xff00) | r;
+		break;
+
+	case VIA + T1LHI:
+		_t1_latch = (_t1_latch & 0x00ff) | (r << 8);
 		_ifr &= ~IER_TIMER1;
 		break;
 
 	case VIA + T1HI:
-		_t1 += (r << 8);
+		_t1 = _t1_latch;
+		_ifr &= ~IER_TIMER1;
 		_timer1 = true;
-		_ifr &= ~IER_TIMER1;
-		break;
-
-	case VIA + T1LLO:
-		_t1_latch = r;
-		break;
-
-	case VIA + T1LHI:
-		_t1_latch += (r << 8);
-		_ifr &= ~IER_TIMER1;
 		break;
 
 	case VIA + T2LO:
@@ -298,8 +307,8 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 
 	case VIA + T2HI:
 		_t2 += (r << 8);
-		_timer2 = true;
 		_ifr &= ~IER_TIMER2;
+		_timer2 = true;
 		break;
 
 	default:

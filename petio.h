@@ -44,7 +44,7 @@ private:
 	volatile bool _timer1, _timer2;
 	volatile uint16_t _t1, _t2;
 	uint16_t _t1_latch;
-	uint8_t _ier, _ifr, _ddra, _ddrb;
+	uint8_t _acr, _ier, _ifr, _ddra, _ddrb;
 	volatile uint8_t _porta, _portb;
 };
 
