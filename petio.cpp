@@ -320,9 +320,9 @@ void petio::sound_off() {
 
 void petio::sound_freq(uint8_t p) {
 	unsigned f = 1000000 / (16*p + 30);
+	if (_octave == 15)
+		f /= 2;
+	else if (_octave == 85)
+		f *= 2;
 	pwm.set_freq(f);
-}
-
-void petio::sound_octave(uint8_t o) {
-	// FIXME
 }
