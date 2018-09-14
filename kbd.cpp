@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include <stdint.h>
 #include <keyboard.h>
 #include "kbd.h"
 
@@ -107,7 +107,7 @@ void kbd::up(uint8_t scan) {
 		_shift = false;
 	else if (isctrl(scan))
 		_ctrl = false;
-	else {
+	else if (scan < 128) {
 		uint8_t k = _map(scan);
 		if (k != 0xff)
 			_reset(k);
@@ -152,7 +152,7 @@ void kbd::down(uint8_t scan) {
 	} else if (isctrl(scan)) {
 		reset();
 		_ctrl = true;
-	} else {
+	} else if (scan < 128) {
 		uint8_t k = _map(scan);
 		if (k != 0xff)
 			_set(k);
