@@ -5,3 +5,4 @@ libcore.a
 *.bin
 *.d
 *.img
+.*.swp
