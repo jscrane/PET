@@ -2,8 +2,8 @@
 #define __CONFIG_H__
 
 // DISPLAY
-#define TFT_BG		VGA_BLACK
-#define TFT_FG		VGA_LIME
+#define TFT_BG		BLACK
+#define TFT_FG		GREEN
 #define CHARS_PER_LINE  40
 #define DISPLAY_LINES	25
 #define DISPLAY_RAM_SIZE	0x0400

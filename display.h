@@ -1,7 +1,7 @@
 #ifndef _DISPLAY_H
 #define _DISPLAY_H
 
-class display: public UTFTDisplay, public Memory::Device {
+class display: public TFTDisplay, public Memory::Device {
 public:
 	virtual void operator= (uint8_t c) { _set(_acc, c); }
 	virtual operator uint8_t () { return _mem[_acc]; }

@@ -1,6 +1,6 @@
 #include <UTFT.h>
 #include <memory.h>
-#include <utftdisplay.h>
+#include <tftdisplay.h>
 #include <hardware.h>
 
 #include "config.h"
@@ -17,7 +17,7 @@ static struct resolution {
 
 void display::begin()
 {
-	UTFTDisplay::begin(TFT_BG, TFT_FG);
+	TFTDisplay::begin(TFT_BG, TFT_FG);
 	clear();
 
 	struct resolution &r = resolutions[_resolution];
@@ -44,36 +44,36 @@ void display::_draw(Memory::address a, uint8_t c)
 		if (b != m) {
 			uint8_t d = (b ^ m);
 			if (d & 1) {
-				utft.setColor((b & 1)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 7, y + j);
+				unsigned c = (b & 1)? TFT_FG: TFT_BG;
+				drawPixel(x + 7, y + j, c);
 			}
 			if (d & 2) {
-				utft.setColor((b & 2)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 6, y + j);
+				unsigned c = (b & 2)? TFT_FG: TFT_BG;
+				drawPixel(x + 6, y + j, c);
 			}
 			if (d & 4) {
-				utft.setColor((b & 4)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 5, y + j);
+				unsigned c = (b & 4)? TFT_FG: TFT_BG;
+				drawPixel(x + 5, y + j, c);
 			}
 			if (d & 8) {
-				utft.setColor((b & 8)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 4, y + j);
+				unsigned c = (b & 8)? TFT_FG: TFT_BG;
+				drawPixel(x + 4, y + j, c);
 			}
 			if (d & 16) {
-				utft.setColor((b & 16)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 3, y + j);
+				unsigned c = (b & 16)? TFT_FG: TFT_BG;
+				drawPixel(x + 3, y + j, c);
 			}
 			if (d & 32) {
-				utft.setColor((b & 32)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 2, y + j);
+				unsigned c = (b & 32)? TFT_FG: TFT_BG;
+				drawPixel(x + 2, y + j, c);
 			}
 			if (d & 64) {
-				utft.setColor((b & 64)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 1, y + j);
+				unsigned c = (b & 64)? TFT_FG: TFT_BG;
+				drawPixel(x + 1, y + j, c);
 			}
 			if (d & 128) {
-				utft.setColor((b & 128)? TFT_FG: TFT_BG);
-				utft.drawPixel(x + 0, y + j);
+				unsigned c = (b & 128)? TFT_FG: TFT_BG;
+				drawPixel(x + 0, y + j, c);
 			}
 		}
 	}
