@@ -1,8 +1,10 @@
 #include <SPI.h>
 #include <SpiRAM.h>
 #include <FS.h>
+#if defined(ESP32)
 #include <SPIFFS.h>
-#include <UTFT.h>
+#endif
+#include <TFT_eSPI.h>
 #include <r65emu.h>
 #include <r6502.h>
 

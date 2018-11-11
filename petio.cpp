@@ -75,6 +75,10 @@ void petio::reset() {
 	timer_create(TICK_FREQ, petio::on_tick);
 }
 
+#if !defined(ESP32)
+#define IRAM_ATTR
+#endif
+
 void IRAM_ATTR petio::on_tick() {
 	io->tick();
 }

@@ -1,4 +1,5 @@
-#include <UTFT.h>
+#include <Stream.h>
+#include <stdint.h>
 #include <memory.h>
 #include <tftdisplay.h>
 #include <hardware.h>
@@ -17,7 +18,7 @@ static struct resolution {
 
 void display::begin()
 {
-	TFTDisplay::begin(TFT_BG, TFT_FG);
+	TFTDisplay::begin(TFT_BG, TFT_FG, reverse_landscape);
 	clear();
 
 	struct resolution &r = resolutions[_resolution];
@@ -40,7 +41,8 @@ void display::_draw(Memory::address a, uint8_t c)
 		cm += 256;
 	}
 	for (unsigned j = 0; j < r.ch; j++) {
-		uint8_t b = charset[ch][j], m = charset[cm][j];
+		uint8_t b = pgm_read_byte(&charset[ch][j]);
+		uint8_t m = pgm_read_byte(&charset[cm][j]);
 		if (b != m) {
 			uint8_t d = (b ^ m);
 			if (d & 1) {
