@@ -1,10 +1,5 @@
 #include <SPI.h>
 #include <SpiRAM.h>
-#include <FS.h>
-#if defined(ESP32)
-#include <SPIFFS.h>
-#endif
-#include <TFT_eSPI.h>
 #include <r65emu.h>
 #include <r6502.h>
 
@@ -64,7 +59,7 @@ void reset() {
 }
 
 void setup() {
-#if defined(DEBUG) || defined(CPU_DEBUG)
+#if defined(DEBUGGING) || defined(CPU_DEBUG)
 	Serial.begin(115200);
 #endif
 	hardware_init(cpu);
