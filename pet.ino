@@ -1,9 +1,8 @@
+#include <stdarg.h>
+
 #include <SPI.h>
-#include <SpiRAM.h>
 #include <r65emu.h>
 #include <r6502.h>
-
-#include <stdarg.h>
 
 #include "config.h"
 #include "port.h"
@@ -67,7 +66,7 @@ void setup() {
 	for (int i = 0; i < RAM_SIZE; i += 1024)
 		memory.put(pages[i / 1024], i);
 
-#if defined(SPIRAM_CS)
+#if defined(USE_SPIRAM)
 	memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
 #endif
 	memory.put(disp, 0x8000);

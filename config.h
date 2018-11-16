@@ -9,7 +9,7 @@
 #define DISPLAY_RAM_SIZE	0x0400
 
 // SPI-RAM
-#if defined(SPIRAM_CS)
+#if defined(USE_SPIRAM)
 #define SPIRAM_BASE     0x3000
 #define SPIRAM_EXTENT	(20 * 1024 / 256)
 
