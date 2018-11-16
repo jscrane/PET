@@ -24,8 +24,11 @@
 #define CPU_INSTRUCTIONS  750
 
 // where programs and images are stored
-//#define PROGRAMS        "/pet/"
+#if defined(USE_SD)
+#define PROGRAMS        "/pet/"
+#else
 #define PROGRAMS        "/"
+#endif
 
 // rom set
 #define SERIES4_ROMS
