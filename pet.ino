@@ -61,6 +61,7 @@ void setup() {
 #if defined(DEBUGGING) || defined(CPU_DEBUG)
 	Serial.begin(115200);
 #endif
+
 	hardware_init(cpu);
 
 	for (int i = 0; i < RAM_SIZE; i += 1024)
