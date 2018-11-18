@@ -8,6 +8,12 @@
 #define DISPLAY_LINES	25
 #define DISPLAY_RAM_SIZE	0x0400
 
+#if defined(USE_UTFT)
+#define TFT_ORIENT	landscape
+#elif defined(USE_ESPI)
+#define TFT_ORIENT	reverse_landscape
+#endif
+
 // SPI-RAM
 #if defined(USE_SPIRAM)
 #define SPIRAM_BASE     0x3000
