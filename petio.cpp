@@ -331,11 +331,27 @@ void petio::sound_off() {
 	pwm.stop();
 }
 
+void petio::sound() {
+	if (_freq > 0) {
+		unsigned f = _freq;
+		if (_octave == 15)
+			f /= 2;
+		else if (_octave == 85)
+			f *= 2;
+		pwm.set_freq(f);
+	}
+}
+
 void petio::sound_freq(uint8_t p) {
-	unsigned f = 1000000 / (16*p + 30);
-	if (_octave == 15)
-		f /= 2;
-	else if (_octave == 85)
-		f *= 2;
-	pwm.set_freq(f);
+	if (p == 0)
+		sound_off();
+	else {
+		_freq = 1000000 / (16*p + 30);
+		sound();
+	}
+}
+
+void petio::sound_octave(uint8_t o) {
+	_octave = o;
+	sound();
 }

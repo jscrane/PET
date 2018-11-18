@@ -10,7 +10,7 @@ public:
 	void operator= (uint8_t b) { write(b); }
 	operator uint8_t() { return read(); }
 
-	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0) {}
+	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0) {}
 	void reset();
 
 	static void on_tick();
@@ -35,10 +35,12 @@ private:
 	// sound
 	void sound_on();
 	void sound_off();
-	void sound_freq(uint8_t);
-	void sound_octave(uint8_t o) { _octave = o; }
+	void sound_freq(uint8_t p);
+	void sound_octave(uint8_t o);
+	void sound();
 
 	uint8_t _octave;
+	uint32_t _freq;
 
 	// via
 	volatile bool _timer1, _timer2;
