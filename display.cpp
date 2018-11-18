@@ -18,7 +18,7 @@ static struct resolution {
 
 void display::begin()
 {
-	TFTDisplay::begin(TFT_BG, TFT_FG, reverse_landscape);
+	TFTDisplay::begin(TFT_BG, TFT_FG, TFT_ORIENT);
 	clear();
 
 	struct resolution &r = resolutions[_resolution];
