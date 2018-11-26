@@ -12,6 +12,7 @@ public:
 
 	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0) {}
 	void reset();
+	bool start(const char *);
 
 	static void on_tick();
 

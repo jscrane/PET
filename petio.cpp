@@ -68,11 +68,16 @@ void petio::reset() {
 	_timer1 = _timer2 = false;
 
 	keyboard.reset();
+}
+
+bool petio::start(const char *programs) {
 #if defined(PWM_SOUND)
 	pwm.begin(PWM_SOUND);
 #endif
 
 	timer_create(TICK_FREQ, petio::on_tick);
+
+	return tape.start(programs);
 }
 
 #if !defined(ESP32)
