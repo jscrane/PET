@@ -121,17 +121,21 @@ void IRAM_ATTR petio::tick() {
 
 static void print(const char *msg, Memory::address a)
 {
+#if defined(DEBUGGING)
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.println(a, 16);
+#endif
 }
 
 static void print(const char *msg, Memory::address a, uint8_t r) {
+#if defined(DEBUGGING)
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.print(a, 16);
 	Serial.print(' ');
 	Serial.println(r, 16);
+#endif
 }
 
 uint8_t petio::read() {
@@ -222,15 +226,15 @@ uint8_t petio::read() {
 		print(" <??? ", _acc);
 		break;
 	}
-if (VIA < _acc && _acc <= VIA + 0x0f)
-	print(" <via ", _acc, r);
+	if (VIA < _acc && _acc <= VIA + 0x0f)
+		print(" <via ", _acc, r);
 
 	return r;
 }
 
 void petio::write(uint8_t r) {
-if (VIA < _acc && _acc <= VIA + 0x0f)
-	print(" >via ", _acc, r);
+	if (VIA < _acc && _acc <= VIA + 0x0f)
+		print(" >via ", _acc, r);
 
 	switch (_acc) {
 	case PIA1 + PORTA:
@@ -274,7 +278,7 @@ if (VIA < _acc && _acc <= VIA + 0x0f)
 		_acr = r;
 		if ((r & VIA_ACR_SHIFT_MASK) == 0x10)
 			sound_on();
-		else if (!(r & VIA_ACR_SHIFT_MASK))
+		else
 			sound_off();
 		if (r & VIA_ACR_T1_CONTINUOUS)
 			_timer1 = true;
@@ -343,6 +347,7 @@ void petio::sound() {
 			f /= 2;
 		else if (_octave == 85)
 			f *= 2;
+		sound_on();
 		pwm.set_freq(f);
 	}
 }
