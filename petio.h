@@ -18,7 +18,7 @@ public:
 
 	port CA2;
 
-	sdtape tape;
+	flash_filer files;
 	kbd keyboard;
 
 	// loads the file currently selected by tape

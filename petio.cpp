@@ -1,7 +1,8 @@
 #include <Arduino.h>
 #include <memory.h>
 #include <keyboard.h>
-#include <sdtape.h>
+#include <serialio.h>
+#include <filer.h>
 #include <timed.h>
 #include <sound_pwm.h>
 #include <hardware.h>
@@ -77,7 +78,7 @@ bool petio::start(const char *programs) {
 
 	timer_create(TICK_FREQ, petio::on_tick);
 
-	return tape.start(programs);
+	return files.start(programs);
 }
 
 #if !defined(ESP32)

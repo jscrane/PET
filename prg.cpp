@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <memory.h>
-#include <sdtape.h>
+#include <serialio.h>
+#include <filer.h>
 #include <keyboard.h>
 #include <hardware.h>
 #include <timed.h>
@@ -11,14 +12,14 @@
 
 bool petio::load_prg()
 {
-	if (!tape.more())
+	if (!files.more())
 		return false;
 
-	uint8_t lo = tape.read();
-	uint8_t hi = tape.read();
+	uint8_t lo = files.read();
+	uint8_t hi = files.read();
 	Memory::address a = lo + (hi << 8);
-	while (tape.more())
-		memory[a++] = tape.read();
+	while (files.more())
+		memory[a++] = files.read();
 	
 	// based on mem_get/set_basic_text() from vice/petmem.c
 	memory[0xc7] = memory[0x28];

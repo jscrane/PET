@@ -101,11 +101,11 @@ void loop() {
 				reset();
 				break;
 			case PS2_F2:
-				filename = io.tape.advance();
+				filename = io.files.advance();
 				disp.status(filename? filename: "No file");
 				break;
 			case PS2_F3:
-				filename = io.tape.rewind();
+				filename = io.files.rewind();
 				disp.status(filename? filename: "No file");
 				break;
 			case PS2_F4:
@@ -116,11 +116,11 @@ void loop() {
 				disp.status(buf);
 				break;
 			case PS2_F6:
-				disp.status(checkpoint(io.tape, PROGRAMS));
+				disp.status(io.files.checkpoint());
 				break;
 			case PS2_F7:
 				if (filename)
-					restore(io.tape, PROGRAMS, filename);
+					io.files.restore(filename);
 				break;
 #if defined(CPU_DEBUG)
 			case PS2_F10:
