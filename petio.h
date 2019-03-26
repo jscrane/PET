@@ -10,9 +10,9 @@ public:
 	void operator= (uint8_t b) { write(b); }
 	operator uint8_t() { return read(); }
 
-	petio(port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0) {}
+	petio(const char *programs, port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(programs) {}
 	void reset();
-	bool start(const char *);
+	bool start();
 
 	static void on_tick();
 

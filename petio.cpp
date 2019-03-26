@@ -71,14 +71,14 @@ void petio::reset() {
 	keyboard.reset();
 }
 
-bool petio::start(const char *programs) {
+bool petio::start() {
 #if defined(PWM_SOUND)
 	pwm.begin(PWM_SOUND);
 #endif
 
 	timer_create(TICK_FREQ, petio::on_tick);
 
-	return files.start(programs);
+	return files.start();
 }
 
 #if !defined(ESP32)

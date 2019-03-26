@@ -40,7 +40,7 @@ prom edit(edit2, 2048);
 
 port irq;
 ram pages[RAM_SIZE / 1024];
-petio io(irq);
+petio io(PROGRAMS, irq);
 display disp(io.CA2);
 r6502 cpu(memory);
 
@@ -53,7 +53,7 @@ void reset() {
 	disp.begin();
 	if (!sd)
 		disp.status("No SD Card");
-	else if (!io.start(PROGRAMS))
+	else if (!io.start())
 		disp.status("Failed to open "PROGRAMS);
 }
 
