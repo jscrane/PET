@@ -10,7 +10,7 @@ public:
 	void operator= (uint8_t b) { write(b); }
 	operator uint8_t() { return read(); }
 
-	petio(const char *programs, port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(programs) {}
+	petio(filer &files, port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
 	void reset();
 	bool start();
 
@@ -18,7 +18,7 @@ public:
 
 	port CA2;
 
-	flash_filer files;
+	filer &files;
 	kbd keyboard;
 
 	// loads the file currently selected by tape
