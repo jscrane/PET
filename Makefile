@@ -1,9 +1,9 @@
 t ?= esp32
 
-ifeq ($t, lm4f)
-PROCESSOR_FAMILY := lm4f
-BOARD := lplm4f120h5qr
-TERM_SPEED := 115200
+TERMINAL_SPEED := 115200
+
+ifeq ($t, tivac)
+BOARD := EK-LM4F120XL
 
 CPPFLAGS = -DDEBUGGING -DHARDWARE_H=\"hw/lm4f-utft-sd.h\"
 LIBRARIES = UTFT SD SpiRAM
@@ -12,7 +12,6 @@ endif
 ifeq ($t, esp8266)
 BOARD := d1_mini
 UPLOAD_SPEED := 921600
-TERM_SPEED := 115200
 SPIFFS_DIR := programs
 FLASH_SIZE := 4M1M
 BUILD_FCPU := 80000000L
@@ -27,7 +26,6 @@ endif
 ifeq ($t, esp32)
 BOARD := node32s
 UPLOAD_SPEED := 921600
-TERM_SPEED := 115200
 SPIFFS_DIR := programs
 
 CPPFLAGS = -DDEBUGGING -DCPU_DEBUG \
@@ -37,4 +35,4 @@ CPPFLAGS = -DDEBUGGING -DCPU_DEBUG \
 LIBRARIES = TFT_eSPI FS SPIFFS
 endif
 
-include arduino-$t.mk
+include $t.mk
