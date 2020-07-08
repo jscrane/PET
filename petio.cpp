@@ -81,7 +81,7 @@ bool petio::start() {
 	return files.start();
 }
 
-#if !defined(ESP32)
+#if !defined(ESP32) && !defined(ESP8266)
 #define IRAM_ATTR
 #endif
 

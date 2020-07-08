@@ -6,3 +6,5 @@ libcore.a
 *.d
 *.img
 .*.swp
+.build
+*.txt.mk
