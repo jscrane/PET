@@ -12,7 +12,7 @@ endif
 ifeq ($t, esp8266)
 BOARD := d1_mini
 UPLOAD_SPEED := 921600
-SPIFFS_DIR := programs
+FS_DIR := programs
 FLASH_SIZE := 4M1M
 F_CPU := 80
 
@@ -25,7 +25,7 @@ endif
 ifeq ($t, esp32)
 BOARD := node32s
 UPLOAD_SPEED := 921600
-SPIFFS_DIR := programs
+FS_DIR := programs
 
 CPPFLAGS = -DDEBUGGING -DCPU_DEBUG \
 	-DUSER_SETUP_LOADED -DILI9341_DRIVER -DTFT_CS=5 -DTFT_DC=2 \
