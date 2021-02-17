@@ -16,15 +16,11 @@
 
 // SPI-RAM
 #if defined(USE_SPIRAM)
-#define SPIRAM_BASE     0x3000
-#define SPIRAM_EXTENT	(20 * 1024 / 256)
-
-// RAM provided by uC (must be a multiple of 1024)
-#define RAM_SIZE	0x3000
-#else
-
-#define RAM_SIZE	0x8000
+#define SPIRAM_BASE     RAM_SIZE
+#define SPIRAM_EXTENT	((0x8000 - RAM_SIZE) / Memory::page_size)
 #endif
+
+#define RAM_PAGES	(RAM_SIZE / ram::page_size)
 
 // number of CPU instructions to run per loop
 #define CPU_INSTRUCTIONS  750

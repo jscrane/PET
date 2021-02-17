@@ -39,7 +39,7 @@ prom edit(edit2, 2048);
 #endif
 
 port irq;
-ram pages[RAM_SIZE / 1024];
+ram pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files, irq);
 display disp(io.CA2);
@@ -55,7 +55,7 @@ void reset() {
 	if (!sd)
 		disp.status("No SD Card");
 	else if (!io.start())
-		disp.status("Failed to open "PROGRAMS);
+		disp.status("Failed to open " PROGRAMS);
 }
 
 void setup() {
@@ -65,8 +65,8 @@ void setup() {
 
 	hardware_init(cpu);
 
-	for (int i = 0; i < RAM_SIZE; i += 1024)
-		memory.put(pages[i / 1024], i);
+	for (int i = 0; i < RAM_PAGES; i++)
+		memory.put(pages[i], i * ram::page_size);
 
 #if defined(USE_SPIRAM)
 	memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
