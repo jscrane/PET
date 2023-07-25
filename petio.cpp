@@ -62,8 +62,6 @@ static petio *io;
 static PWM pwm;
 
 void petio::reset() {
-	io = this;
-
 	_acr = _ifr = _ier = 0x00;
 	_t1 = _t2 = 0;
 	_timer1 = _timer2 = false;
@@ -72,6 +70,8 @@ void petio::reset() {
 }
 
 bool petio::start() {
+	io = this;
+
 #if defined(PWM_SOUND)
 	pwm.begin(PWM_SOUND);
 #endif

@@ -1,17 +1,19 @@
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
-// DISPLAY
-#define TFT_BG		BLACK
-#define TFT_FG		GREEN
+// Screen
+#define BG_COLOUR	BLACK
+#define FG_COLOUR	GREEN
 #define CHARS_PER_LINE  40
-#define DISPLAY_LINES	25
-#define DISPLAY_RAM_SIZE	0x0400
+#define SCREEN_LINES	25
+#define SCREEN_RAM_SIZE	0x0400
 
 #if defined(USE_UTFT)
-#define TFT_ORIENT	landscape
+#define ORIENT	landscape
 #elif defined(USE_ESPI)
-#define TFT_ORIENT	reverse_landscape
+#define ORIENT	reverse_landscape
+#elif defined(USE_VGA)
+#define ORIENT	landscape
 #endif
 
 // SPI-RAM

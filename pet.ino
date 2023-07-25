@@ -6,7 +6,7 @@
 
 #include "config.h"
 #include "port.h"
-#include "display.h"
+#include "screen.h"
 #include "kbd.h"
 #include "petio.h"
 
@@ -42,20 +42,17 @@ port irq;
 ram pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files, irq);
-display disp(io.CA2);
+screen screen(io.CA2);
 r6502 cpu(memory);
 
 const char *filename;
 
-void reset() {
-	bool sd = hardware_reset();
+bool reset() {
 
+	bool sd = hardware_reset();
 	io.reset();
-	disp.begin();
-	if (!sd)
-		disp.status("No SD Card");
-	else if (!io.start())
-		disp.status("Failed to open " PROGRAMS);
+	screen.begin();
+	return sd;
 }
 
 void setup() {
@@ -71,7 +68,7 @@ void setup() {
 #if defined(USE_SPIRAM)
 	memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
 #endif
-	memory.put(disp, 0x8000);
+	memory.put(screen, 0x8000);
 	memory.put(io, 0xe800);
 
 #if defined(SERIES4_ROMS)
@@ -82,7 +79,12 @@ void setup() {
 	memory.put(edit, 0xe000);
 	memory.put(kernal, 0xf000);
 
-	reset();
+	bool sd = reset();
+
+	if (!sd)
+		screen.status("No SD Card");
+	else if (!io.start())
+		screen.status("Failed to open " PROGRAMS);
 }
 
 void loop() {
@@ -103,21 +105,21 @@ void loop() {
 				break;
 			case PS2_F2:
 				filename = io.files.advance();
-				disp.status(filename? filename: "No file");
+				screen.status(filename? filename: "No file");
 				break;
 			case PS2_F3:
 				filename = io.files.rewind();
-				disp.status(filename? filename: "No file");
+				screen.status(filename? filename: "No file");
 				break;
 			case PS2_F4:
 				if (io.load_prg())
 					snprintf(buf, sizeof(buf), "Loaded %s", filename);
 				else
 					snprintf(buf, sizeof(buf), "Failed to load %s", filename);
-				disp.status(buf);
+				screen.status(buf);
 				break;
 			case PS2_F6:
-				disp.status(io.files.checkpoint());
+				screen.status(io.files.checkpoint());
 				break;
 			case PS2_F7:
 				if (filename)
