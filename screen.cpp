@@ -1,12 +1,12 @@
 #include <Stream.h>
 #include <stdint.h>
 #include <memory.h>
-#include <tftdisplay.h>
+#include <display.h>
 #include <hardware.h>
 
 #include "config.h"
 #include "port.h"
-#include "display.h"
+#include "screen.h"
 #include "roms/characters_vic20.h"
 
 static struct resolution {
@@ -16,19 +16,19 @@ static struct resolution {
 	{"40x25", 8, 8},
 };
 
-void display::begin()
+void screen::begin()
 {
-	TFTDisplay::begin(TFT_BG, TFT_FG, TFT_ORIENT);
+	Display::begin(BG_COLOUR, FG_COLOUR, ORIENT);
 	clear();
 
 	struct resolution &r = resolutions[_resolution];
-	unsigned dh = DISPLAY_LINES * r.ch;
+	unsigned dh = SCREEN_LINES * r.ch;
 	_yoff = _dy < dh? 0: (_dy - dh) / 2;
 }
 
-void display::_draw(Memory::address a, uint8_t c)
+void screen::_draw(Memory::address a, uint8_t c)
 {
-	if (a >= CHARS_PER_LINE * DISPLAY_LINES)
+	if (a >= CHARS_PER_LINE * SCREEN_LINES)
 		return;
 
 	struct resolution &r = resolutions[_resolution];
@@ -46,48 +46,48 @@ void display::_draw(Memory::address a, uint8_t c)
 		if (b != m) {
 			uint8_t d = (b ^ m);
 			if (d & 1) {
-				unsigned c = (b & 1)? TFT_FG: TFT_BG;
+				unsigned c = (b & 1)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 7, y + j, c);
 			}
 			if (d & 2) {
-				unsigned c = (b & 2)? TFT_FG: TFT_BG;
+				unsigned c = (b & 2)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 6, y + j, c);
 			}
 			if (d & 4) {
-				unsigned c = (b & 4)? TFT_FG: TFT_BG;
+				unsigned c = (b & 4)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 5, y + j, c);
 			}
 			if (d & 8) {
-				unsigned c = (b & 8)? TFT_FG: TFT_BG;
+				unsigned c = (b & 8)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 4, y + j, c);
 			}
 			if (d & 16) {
-				unsigned c = (b & 16)? TFT_FG: TFT_BG;
+				unsigned c = (b & 16)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 3, y + j, c);
 			}
 			if (d & 32) {
-				unsigned c = (b & 32)? TFT_FG: TFT_BG;
+				unsigned c = (b & 32)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 2, y + j, c);
 			}
 			if (d & 64) {
-				unsigned c = (b & 64)? TFT_FG: TFT_BG;
+				unsigned c = (b & 64)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 1, y + j, c);
 			}
 			if (d & 128) {
-				unsigned c = (b & 128)? TFT_FG: TFT_BG;
+				unsigned c = (b & 128)? FG_COLOUR: BG_COLOUR;
 				drawPixel(x + 0, y + j, c);
 			}
 		}
 	}
 }
 
-void display::checkpoint(Stream &s)
+void screen::checkpoint(Stream &s)
 {
 	s.write(_resolution); 
 	s.write(_mem, sizeof(_mem));
 }
 
-void display::restore(Stream &s)
+void screen::restore(Stream &s)
 {
 	_resolution = s.read();
 	for (unsigned p = 0; p < sizeof(_mem); p += Memory::page_size) {
