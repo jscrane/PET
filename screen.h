@@ -19,7 +19,7 @@ private:
 	void _draw(Memory::address a, uint8_t c);
 
 	uint8_t _mem[SCREEN_RAM_SIZE];
-	int _resolution, _yoff;
+	int _resolution;
 	port &_upr;
 };
 #endif

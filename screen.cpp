@@ -18,12 +18,10 @@ static struct resolution {
 
 void screen::begin()
 {
-	Display::begin(BG_COLOUR, FG_COLOUR, ORIENT);
-	clear();
-
 	struct resolution &r = resolutions[_resolution];
-	unsigned dh = SCREEN_LINES * r.ch;
-	_yoff = _dy < dh? 0: (_dy - dh) / 2;
+
+	Display::begin(BG_COLOUR, FG_COLOUR, ORIENT, CHARS_PER_LINE*r.cw, SCREEN_LINES*r.ch);
+	clear();
 }
 
 void screen::_draw(Memory::address a, uint8_t c)
@@ -33,7 +31,7 @@ void screen::_draw(Memory::address a, uint8_t c)
 
 	struct resolution &r = resolutions[_resolution];
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
-	unsigned y = r.ch * (a / CHARS_PER_LINE) + _yoff;
+	unsigned y = r.ch * (a / CHARS_PER_LINE);
 
 	unsigned short ch = c, cm = _mem[a];
 	if (!_upr.read()) {
