@@ -4,7 +4,6 @@
 #include <serialio.h>
 #include <filer.h>
 #include <timed.h>
-#include <sound_pwm.h>
 #include <hardware.h>
 
 #include "port.h"
@@ -59,22 +58,17 @@ static petio *io;
 // 50Hz system interrupt frequency
 #define SYS_TICKS	20
 
-static PWM pwm;
-
 void petio::reset() {
 	_acr = _ifr = _ier = 0x00;
 	_t1 = _t2 = 0;
 	_timer1 = _timer2 = false;
 
+	sound_off();
 	keyboard.reset();
 }
 
 bool petio::start() {
 	io = this;
-
-#if defined(PWM_SOUND)
-	pwm.begin(PWM_SOUND);
-#endif
 
 	timer_create(TICK_FREQ, petio::on_tick);
 
@@ -331,25 +325,22 @@ void petio::write(uint8_t r) {
 	}
 }
 
-void petio::sound_on() {
-#if defined(PWM_DUTY)
-	pwm.set_duty(PWM_DUTY);
+void petio::sound_off() {
+#if defined(PWM_SOUND)
+	noTone(PWM_SOUND);
 #endif
 }
 
-void petio::sound_off() {
-	pwm.stop();
-}
-
-void petio::sound() {
+void petio::sound_on() {
 	if (_freq > 0) {
 		unsigned f = _freq;
 		if (_octave == 15)
 			f /= 2;
 		else if (_octave == 85)
 			f *= 2;
-		sound_on();
-		pwm.set_freq(f);
+#if defined(PWM_SOUND)
+		tone(PWM_SOUND, f);
+#endif
 	}
 }
 
@@ -358,11 +349,11 @@ void petio::sound_freq(uint8_t p) {
 		sound_off();
 	else {
 		_freq = 1000000 / (16*p + 30);
-		sound();
+		sound_on();
 	}
 }
 
 void petio::sound_octave(uint8_t o) {
 	_octave = o;
-	sound();
+	sound_on();
 }
