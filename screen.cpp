@@ -7,7 +7,7 @@
 #include "config.h"
 #include "port.h"
 #include "screen.h"
-#include "roms/characters_vic20.h"
+#include CHARSET_ROM
 
 static struct resolution {
 	const char *name;

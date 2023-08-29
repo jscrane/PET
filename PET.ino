@@ -17,25 +17,25 @@
 #include "roms/kernal4.h"
 #include "roms/edit4.h"
 
-#else
-#include "roms/basic2_c000.h"
-#include "roms/basic2_d000.h"
-#include "roms/kernal2.h"
-#include "roms/edit2.h"
-#endif
-
-#if defined(SERIES4_ROMS)
 prom basica(basic4_b000, 4096);
 prom basicb(basic4_c000, 4096);
 prom basicc(basic4_d000, 4096);
 prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
 
-#else
+#elif defined(SERIES2_ROMS)
+#include "roms/basic2_c000.h"
+#include "roms/basic2_d000.h"
+#include "roms/kernal2.h"
+#include "roms/edit2.h"
+
 prom basicb(basic2_c000, 4096);
 prom basicc(basic2_d000, 4096);
 prom kernal(kernal2, 4096);
 prom edit(edit2, 2048);
+
+#else
+#error "No ROM-set defined"
 #endif
 
 port irq;

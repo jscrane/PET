@@ -36,5 +36,10 @@
 
 // rom set
 #define SERIES4_ROMS
+//#define SERIES2_ROMS
+
+// character set
+#define CHARSET_ROM	"roms/characters_vic20.h"
+//#define CHARSET_ROM	"roms/characters2.h"
 
 #endif

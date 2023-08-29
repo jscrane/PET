@@ -12,7 +12,7 @@ endif
 ifeq ($t, esp8266)
 BOARD := d1_mini
 BAUD := 921600
-FS_DIR := programs
+FS_DIR := data
 EESZ := 4M1M
 F_CPU := 80
 
@@ -24,7 +24,7 @@ endif
 
 ifeq ($t, esp32)
 UPLOADSPEED := 921600
-FS_DIR := programs
+FS_DIR := data
 LIBRARIES = FS SPIFFS
 CPPFLAGS = -DDEBUGGING -DTERMINAL_SPEED=$(TERMINAL_SPEED)
 
