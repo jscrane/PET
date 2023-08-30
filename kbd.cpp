@@ -80,9 +80,17 @@ void kbd::_reset(uint8_t k) {
 }
 
 void kbd::up(uint8_t scan) {
+
+#if defined(DEBUGGING)
+	Serial.printf("key up: %02x", scan);
+	Serial.println();
+#endif
 	if (_ext) {
 		_ext = false;
 		switch(scan) {
+		case 0x5a:	// enter
+			_reset(0x65);
+			break;
 		case 0x69:	// end
 			_reset(0x80);
 		case 0x6c:	// home
@@ -120,11 +128,18 @@ void kbd::_set(uint8_t k) {
 }
 
 void kbd::down(uint8_t scan) {
+#if defined(DEBUGGING)
+	Serial.printf("key down: %02x", scan);
+	Serial.println();
+#endif
 	if (scan == 0xe0)
 		_ext = true;
 	else if (_ext) {
 		_ext = false;
 		switch(scan) {
+		case 0x5a:	// enter
+			_set(0x65);
+			break;
 		case 0x69:	// end
 			_set(0x80);
 		case 0x6c:	// home
