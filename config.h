@@ -35,11 +35,15 @@
 #endif
 
 // rom set
-#define SERIES4_ROMS
-//#define SERIES2_ROMS
+#if !defined(ROM_SET)
+#define ROM_SET	series4
+//#define ROM_SET series2
+#endif
 
 // character set
+#if !defined(CHARSET_ROM)
 #define CHARSET_ROM	"roms/characters_vic20.h"
 //#define CHARSET_ROM	"roms/characters2.h"
+#endif
 
 #endif

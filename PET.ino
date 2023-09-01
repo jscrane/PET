@@ -10,32 +10,32 @@
 #include "kbd.h"
 #include "petio.h"
 
-#if defined(SERIES4_ROMS)
+#if ROM_SET == series4
 #include "roms/basic4_b000.h"
 #include "roms/basic4_c000.h"
 #include "roms/basic4_d000.h"
 #include "roms/kernal4.h"
 #include "roms/edit4.h"
 
-prom basica(basic4_b000, 4096);
-prom basicb(basic4_c000, 4096);
-prom basicc(basic4_d000, 4096);
+prom basic_b000(basic4_b000, 4096);
+prom basic_c000(basic4_c000, 4096);
+prom basic_d000(basic4_d000, 4096);
 prom kernal(kernal4, 4096);
 prom edit(edit4, 2048);
 
-#elif defined(SERIES2_ROMS)
+#elif ROM_SET == series2
 #include "roms/basic2_c000.h"
 #include "roms/basic2_d000.h"
 #include "roms/kernal2.h"
 #include "roms/edit2.h"
 
-prom basicb(basic2_c000, 4096);
-prom basicc(basic2_d000, 4096);
+prom basic_c000(basic2_c000, 4096);
+prom basic_d000(basic2_d000, 4096);
 prom kernal(kernal2, 4096);
 prom edit(edit2, 2048);
 
 #else
-#error "No ROM-set defined"
+#error "ROM_SET not defined"
 #endif
 
 port irq;
@@ -71,11 +71,11 @@ void setup() {
 	memory.put(screen, 0x8000);
 	memory.put(io, 0xe800);
 
-#if defined(SERIES4_ROMS)
-	memory.put(basica, 0xb000);
+#if ROM_SET == series4
+	memory.put(basic_b000, 0xb000);
 #endif
-	memory.put(basicb, 0xc000);
-	memory.put(basicc, 0xd000);
+	memory.put(basic_c000, 0xc000);
+	memory.put(basic_d000, 0xd000);
 	memory.put(edit, 0xe000);
 	memory.put(kernal, 0xf000);
 
