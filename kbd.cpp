@@ -87,12 +87,6 @@ void kbd::up(uint8_t scan) {
 	if (_ext) {
 		_ext = false;
 		switch(scan) {
-		case 0x4a:	// keypad /
-			_reset(0x37);
-			break;
-		case 0x5a:	// keypad enter
-			_reset(0x65);
-			break;
 		case 0x69:	// end
 			_reset(0x80);
 		case 0x6c:	// home
@@ -112,6 +106,10 @@ void kbd::up(uint8_t scan) {
 			_reset(0x80);
 		case 0x71:	// del
 			_reset(0x17);
+			break;
+		default:
+			if (scan < 0x80)
+				_reset(_map(scan));
 			break;
 		}
 	} else if (isshift(scan))
@@ -139,12 +137,6 @@ void kbd::down(uint8_t scan) {
 	else if (_ext) {
 		_ext = false;
 		switch(scan) {
-		case 0x4a:	// keypad /
-			_set(0x37);
-			break;
-		case 0x5a:	// keypad enter
-			_set(0x65);
-			break;
 		case 0x69:	// end
 			_set(0x80);
 		case 0x6c:	// home
@@ -165,6 +157,9 @@ void kbd::down(uint8_t scan) {
 		case 0x71:	// del
 			_set(0x17);
 			break;
+		default:
+			if (scan < 0x80)
+				_set(_map(scan));
 		}
 	} else if (isshift(scan)) {
 		// reset any depressed keys so they don't get stuck
