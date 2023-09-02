@@ -42,8 +42,7 @@
 
 // character set
 #if !defined(CHARSET_ROM)
-#define CHARSET_ROM	"roms/characters_vic20.h"
-//#define CHARSET_ROM	"roms/characters2.h"
+#define CHARSET_ROM	"roms/characters2.h"
 #endif
 
 #endif

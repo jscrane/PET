@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Stream.h>
 #include <stdint.h>
 #include <memory.h>
@@ -33,49 +34,23 @@ void screen::_draw(Memory::address a, uint8_t c)
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
 	unsigned y = r.ch * (a / CHARS_PER_LINE);
 
-	unsigned short ch = c, cm = _mem[a];
-	if (!_upr.read()) {
-		ch += 256;
-		cm += 256;
-	}
+	uint8_t ch = (c & 0x7f);
+	if (_upr.read())
+		ch |= 0x80;
+
 	for (unsigned j = 0; j < r.ch; j++) {
 		uint8_t b = pgm_read_byte(&charset[ch][j]);
-		uint8_t m = pgm_read_byte(&charset[cm][j]);
-		if (b != m) {
-			uint8_t d = (b ^ m);
-			if (d & 1) {
-				unsigned c = (b & 1)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 7, y + j, c);
-			}
-			if (d & 2) {
-				unsigned c = (b & 2)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 6, y + j, c);
-			}
-			if (d & 4) {
-				unsigned c = (b & 4)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 5, y + j, c);
-			}
-			if (d & 8) {
-				unsigned c = (b & 8)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 4, y + j, c);
-			}
-			if (d & 16) {
-				unsigned c = (b & 16)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 3, y + j, c);
-			}
-			if (d & 32) {
-				unsigned c = (b & 32)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 2, y + j, c);
-			}
-			if (d & 64) {
-				unsigned c = (b & 64)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 1, y + j, c);
-			}
-			if (d & 128) {
-				unsigned c = (b & 128)? FG_COLOUR: BG_COLOUR;
-				drawPixel(x + 0, y + j, c);
-			}
-		}
+		if (c & 0x80)	// invert?
+			b = ~b;
+
+		drawPixel(x + 7, y + j, (b & 1)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 6, y + j, (b & 2)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 5, y + j, (b & 4)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 4, y + j, (b & 8)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 3, y + j, (b & 16)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 2, y + j, (b & 32)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 1, y + j, (b & 64)? FG_COLOUR: BG_COLOUR);
+		drawPixel(x + 0, y + j, (b & 128)? FG_COLOUR: BG_COLOUR);
 	}
 }
 

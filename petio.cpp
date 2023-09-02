@@ -241,7 +241,7 @@ void petio::write(uint8_t r) {
 		break;
 
 	case VIA + PCR:
-		CA2.write(r & 0x02);	
+		CA2.write(r & 0x02);
 		break;
 
 	case VIA + VPORTB:
