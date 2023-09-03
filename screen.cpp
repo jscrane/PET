@@ -50,9 +50,6 @@ void screen::_set(Memory::address a, uint8_t c)
 	uint8_t bit = (1 << (a % 8)), b = a / 8;
 	bool invert = (c & 0x80), inverted = (_inv[b] & bit);
 
-	Serial.printf("%x %x %x %d %d", c, ch, cm, invert, inverted);
-	Serial.println();
-
 	if (invert == inverted && ch == cm)
 		return;
 
