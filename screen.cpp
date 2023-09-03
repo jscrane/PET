@@ -25,7 +25,16 @@ void screen::begin()
 	clear();
 }
 
-void screen::_draw(Memory::address a, uint8_t c)
+uint8_t screen::_get(Memory::address a)
+{
+	uint8_t c = _mem[a];
+	uint8_t bit = (1 << (a % 8)), b = a / 8;
+	if (_inv[b] & bit)
+		return c | 0x80;
+	return c;
+}
+
+void screen::_set(Memory::address a, uint8_t c)
 {
 	if (a >= CHARS_PER_LINE * SCREEN_LINES)
 		return;
@@ -34,35 +43,75 @@ void screen::_draw(Memory::address a, uint8_t c)
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
 	unsigned y = r.ch * (a / CHARS_PER_LINE);
 
-	uint8_t ch = (c & 0x7f);
+	uint8_t ch = (c & 0x7f), cm = _mem[a];
 	if (_upr.read())
 		ch |= 0x80;
 
+	uint8_t bit = (1 << (a % 8)), b = a / 8;
+	bool invert = (c & 0x80), inverted = (_inv[b] & bit);
+
+	Serial.printf("%x %x %x %d %d", c, ch, cm, invert, inverted);
+	Serial.println();
+
+	if (invert == inverted && ch == cm)
+		return;
+
 	for (unsigned j = 0; j < r.ch; j++) {
 		uint8_t b = pgm_read_byte(&charset[ch][j]);
-		if (c & 0x80)	// invert?
+		if (invert)
 			b = ~b;
 
-		drawPixel(x + 7, y + j, (b & 1)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 6, y + j, (b & 2)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 5, y + j, (b & 4)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 4, y + j, (b & 8)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 3, y + j, (b & 16)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 2, y + j, (b & 32)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 1, y + j, (b & 64)? FG_COLOUR: BG_COLOUR);
-		drawPixel(x + 0, y + j, (b & 128)? FG_COLOUR: BG_COLOUR);
+		uint8_t m = pgm_read_byte(&charset[cm][j]);
+		if (inverted)
+			m = ~m;
+
+		if (b != m) {
+			uint8_t d = (b ^ m);
+			if (d & 1)
+				drawPixel(x + 7, y + j, (b & 1)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 2)
+				drawPixel(x + 6, y + j, (b & 2)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 4)
+				drawPixel(x + 5, y + j, (b & 4)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 8)
+				drawPixel(x + 4, y + j, (b & 8)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 16)
+				drawPixel(x + 3, y + j, (b & 16)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 32)
+				drawPixel(x + 2, y + j, (b & 32)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 64)
+				drawPixel(x + 1, y + j, (b & 64)? FG_COLOUR: BG_COLOUR);
+
+			if (d & 128)
+				drawPixel(x + 0, y + j, (b & 128)? FG_COLOUR: BG_COLOUR);
+		}
 	}
+	_mem[a] = ch;
+	if (invert)
+		_inv[b] |= bit;
+	else
+		_inv[b] &= ~bit;
 }
 
 void screen::checkpoint(Stream &s)
 {
 	s.write(_resolution); 
+	s.write(_inv, sizeof(_inv));
 	s.write(_mem, sizeof(_mem));
 }
 
 void screen::restore(Stream &s)
 {
 	_resolution = s.read();
+
+	s.readBytes(_inv, sizeof(_inv));
+
 	for (unsigned p = 0; p < sizeof(_mem); p += Memory::page_size) {
 		char buf[Memory::page_size];
 		s.readBytes(buf, sizeof(buf));
