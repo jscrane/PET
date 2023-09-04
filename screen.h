@@ -4,7 +4,7 @@
 class screen: public Display, public Memory::Device {
 public:
 	virtual void operator= (uint8_t c) { _set(_acc, c); }
-	virtual operator uint8_t () { return _get(_acc); }
+	virtual operator uint8_t () { return _mem[_acc]; }
 
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
@@ -14,9 +14,8 @@ public:
 
 private:
 	void _set(Memory::address a, uint8_t c);
-	uint8_t _get(Memory::address a);
 
-	uint8_t _mem[SCREEN_RAM_SIZE], _inv[SCREEN_RAM_SIZE / 8];
+	uint8_t _mem[SCREEN_RAM_SIZE];
 	int _resolution;
 	port &_upr;
 };

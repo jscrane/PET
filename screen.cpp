@@ -25,33 +25,33 @@ void screen::begin()
 	clear();
 }
 
-uint8_t screen::_get(Memory::address a)
-{
-	uint8_t c = _mem[a];
-	uint8_t bit = (1 << (a % 8)), b = a / 8;
-	if (_inv[b] & bit)
-		return c | 0x80;
-	return c;
-}
-
+/*
+ * c is "nearly" the character to be written at address a:
+ * bit 7 of c indicates whether it should be inverted (reverse video)
+ * bit 1 of VIA register CA2 indicates whether the displayed character
+ * should be taken from the lower- or upper-half of the character set;
+ * this bit is set by POKE 59468, 14 and reset by POKE 59468, 12.
+ */
 void screen::_set(Memory::address a, uint8_t c)
 {
 	if (a >= CHARS_PER_LINE * SCREEN_LINES)
+		return;
+
+	uint8_t cm = _mem[a];
+	if (c == cm)
 		return;
 
 	struct resolution &r = resolutions[_resolution];
 	unsigned x = r.cw * (a % CHARS_PER_LINE);
 	unsigned y = r.ch * (a / CHARS_PER_LINE);
 
-	uint8_t ch = (c & 0x7f), cm = _mem[a];
-	if (_upr.read())
+	uint8_t ch = (c & 0x7f);
+	bool invert = (c & 0x80), inverted = (cm & 0x80);
+	cm &= 0x7f;
+	if (_upr.read()) {
 		ch |= 0x80;
-
-	uint8_t bit = (1 << (a % 8)), b = a / 8;
-	bool invert = (c & 0x80), inverted = (_inv[b] & bit);
-
-	if (invert == inverted && ch == cm)
-		return;
+		cm |= 0x80;
+	}
 
 	for (unsigned j = 0; j < r.ch; j++) {
 		uint8_t b = pgm_read_byte(&charset[ch][j]);
@@ -89,17 +89,12 @@ void screen::_set(Memory::address a, uint8_t c)
 				drawPixel(x + 0, y + j, (b & 128)? FG_COLOUR: BG_COLOUR);
 		}
 	}
-	_mem[a] = ch;
-	if (invert)
-		_inv[b] |= bit;
-	else
-		_inv[b] &= ~bit;
+	_mem[a] = c;
 }
 
 void screen::checkpoint(Stream &s)
 {
 	s.write(_resolution); 
-	s.write(_inv, sizeof(_inv));
 	s.write(_mem, sizeof(_mem));
 }
 
@@ -107,10 +102,8 @@ void screen::restore(Stream &s)
 {
 	_resolution = s.read();
 
-	s.readBytes(_inv, sizeof(_inv));
-
-	for (unsigned p = 0; p < sizeof(_mem); p += Memory::page_size) {
-		char buf[Memory::page_size];
+	for (Memory::address p = 0; p < sizeof(_mem); p += Memory::page_size) {
+		uint8_t buf[Memory::page_size];
 		s.readBytes(buf, sizeof(buf));
 		for (unsigned i = 0; i < Memory::page_size; i++)
 			_set(p + i, buf[i]);
