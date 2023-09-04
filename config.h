@@ -45,4 +45,7 @@
 #define CHARSET_ROM	"roms/characters2.h"
 #endif
 
+// debugging
+//#define DEBUGGING
+
 #endif
