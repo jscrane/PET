@@ -3,6 +3,8 @@
 #include <keyboard.h>
 #include "kbd.h"
 
+//#define DEBUGGING
+
 // http://www.6502.org/users/andre/petindex/keyboards.html
 
 // maps scan codes to pet rows/cols (graphics keyboard)
