@@ -20,4 +20,6 @@ Header files are created from binary images using [makerom](https://github.com/j
 
 	$ makerom -bp basic-2-c000.901465-01.bin basic2_c000 > basic2_c000.h
 
-(Character-set roms require editing after conversion: see characters2.h)
+Character-set roms require further editing after conversion, e.g.:
+
+	$ makerom -b -p images/characters-2.901447-10.bin charset | sed -e 's/^\t0/\t{ 0/' -e 's/, $/, },/' -e 's/\[\]/\[256\]\[8\]/' > characters2.h
