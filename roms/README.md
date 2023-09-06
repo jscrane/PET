@@ -11,7 +11,6 @@ These are mostly from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm/firmw
 - edit4.h       (edit-4-n.901447-29.bin)
 - kernal4.h     (kernal-4.901465-22.bin)
 - characters2.h (characters-2.901447-10.bin)
-- noncom.h	(901447-10m.bin)
 
 See also [here](http://www.6502.org/users/sjgray/computer/cbmchr/cbmchr.html).
 
@@ -20,3 +19,5 @@ See also [this useful document](http://www.zimmers.net/anonftp/pub/cbm/firmware/
 Header files are created from binary images using [makerom](https://github.com/jscrane/emul8/tree/master/util):
 
 	$ makerom -bp basic-2-c000.901465-01.bin basic2_c000 > basic2_c000.h
+
+(Character-set roms require editing after conversion: see characters2.h)
