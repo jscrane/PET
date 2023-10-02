@@ -5,6 +5,7 @@
 #include <keyboard.h>
 #include <hardware.h>
 #include <timed.h>
+#include <pia.h>
 
 #include "kbd.h"
 #include "port.h"

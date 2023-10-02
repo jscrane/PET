@@ -5,12 +5,14 @@
 #include <filer.h>
 #include <timed.h>
 #include <hardware.h>
+#include <pia.h>
 
 #include "port.h"
 #include "kbd.h"
 #include "petio.h"
 
 // see http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/PET-Interfaces.txt
+// and http://www.6502.org/users/andre/petindex/progmod.html
 
 // base is 0xe800
 #define PIA1	0x0010
@@ -65,6 +67,7 @@ void petio::reset() {
 
 	sound_off();
 	keyboard.reset();
+	PIA::reset();
 }
 
 bool petio::start() {
@@ -116,7 +119,7 @@ void IRAM_ATTR petio::tick() {
 
 static void print(const char *msg, Memory::address a)
 {
-#if defined(DEBUGGING)
+#if defined(DEBUG_IO)
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.println(a, 16);
@@ -124,7 +127,7 @@ static void print(const char *msg, Memory::address a)
 }
 
 static void print(const char *msg, Memory::address a, uint8_t r) {
-#if defined(DEBUGGING)
+#if defined(DEBUG_IO)
 	Serial.print(millis());
 	Serial.print(msg);
 	Serial.print(a, 16);
@@ -133,28 +136,26 @@ static void print(const char *msg, Memory::address a, uint8_t r) {
 #endif
 }
 
-uint8_t petio::read() {
+uint8_t petio::read_portb() {
+	return keyboard.read();
+}
+
+uint8_t petio::read_porta() {
+	// diagnostic sense high (otherwise get monitor)
+	// with cassette sense get "press play on tape #n"
+	//return 0x80 + keyboard.row();
+	return PIA::read_porta() | 0x80;
+}
+
+petio::operator uint8_t() {
 	uint8_t r = 0x00;
 
 	switch (_acc) {
-	// keyboard in
 	case PIA1 + PORTB:
-		r = keyboard.read();
-		break;
-
 	case PIA1 + PORTA:
-		// diagnostic sense high (otherwise get monitor)
-		// with cassette sense get "press play on tape #n"
-		r = 0x80 + keyboard.row();
-		break;
-
 	case PIA1 + CRA:
-		// video sync in???
-//		r = 0x87;
-		break;
-
 	case PIA1 + CRB:
-		// FIXME: this is required for tape
+		r = PIA::read(_acc & 0x0f);
 		break;
 
 	case VIA + VPORTA:
@@ -221,23 +222,27 @@ uint8_t petio::read() {
 		print(" <??? ", _acc);
 		break;
 	}
-	if (VIA < _acc && _acc <= VIA + 0x0f)
+	if (VIA <= _acc && _acc <= VIA + 0x0f)
 		print(" <via ", _acc, r);
 
 	return r;
 }
 
-void petio::write(uint8_t r) {
-	if (VIA < _acc && _acc <= VIA + 0x0f)
+void petio::write_porta(uint8_t r) {
+	keyboard.write(r & 0x0f);
+	PIA::write_porta(r);
+}
+
+void petio::operator=(uint8_t r) {
+	if (VIA <= _acc && _acc <= VIA + 0x0f)
 		print(" >via ", _acc, r);
 
 	switch (_acc) {
+	case PIA1 + PORTB:
 	case PIA1 + PORTA:
-		keyboard.write(r & 0x0f);
-		break;
-
+	case PIA1 + CRA:
 	case PIA1 + CRB:
-		// for now
+		PIA::write(_acc & 0x0f, r);
 		break;
 
 	case VIA + PCR:

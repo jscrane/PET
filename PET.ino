@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <r65emu.h>
 #include <r6502.h>
+#include <pia.h>
 
 #include "config.h"
 #include "port.h"
