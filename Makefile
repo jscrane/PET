@@ -1,6 +1,7 @@
 t ?= esp32
 
 TERMINAL_SPEED := 115200
+TERMINAL_EXTRA_FLAGS := -C serialout.txt
 
 ifeq ($t, tivac)
 BOARD := EK-LM4F120XL
