@@ -1,13 +1,13 @@
 #ifndef __PETIO_H
 #define __PETIO_H
 
-class port;
+class Line;
 
 // this occupies all of the addresses (and more) dedicated to the 
 // two PIAs and the VIA
 class petio: public Memory::Device, public PIA {
 public:
-	petio(filer &files, port &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
+	petio(filer &files, Line &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
 	void reset();
 	bool start();
 
@@ -16,7 +16,7 @@ public:
 
 	static void on_tick();
 
-	port CA2;
+	Line CA2;
 
 	filer &files;
 	kbd keyboard;
@@ -33,7 +33,7 @@ protected:
 private:
 	void tick();
 
-	port &_irq;
+	Line &_irq;
 	uint8_t _ticks;
 
 	// sound

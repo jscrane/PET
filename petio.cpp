@@ -7,7 +7,7 @@
 #include <hardware.h>
 #include <pia.h>
 
-#include "port.h"
+#include "line.h"
 #include "kbd.h"
 #include "petio.h"
 
@@ -90,7 +90,7 @@ void IRAM_ATTR petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
 		_portb |= VIA_VIDEO_RETRACE;
-		_irq.write(true);
+		_irq.set();
 	} else
 		_portb &= ~VIA_VIDEO_RETRACE;
 
@@ -100,7 +100,7 @@ void IRAM_ATTR petio::tick() {
 			_timer1 = false;
 			_ifr |= IER_TIMER1;
 			if ((_ier & IER_MASTER) && (_ier & IER_TIMER1))
-				_irq.write(true);
+				_irq.set();
 		} else
 			_t1 -= TICK_FREQ;
 	}
@@ -111,7 +111,7 @@ void IRAM_ATTR petio::tick() {
 			_timer2 = false;
 			_ifr |= IER_TIMER2;
 			if ((_ier & IER_MASTER) && (_ier & IER_TIMER2))
-				_irq.write(true);
+				_irq.set();
 		} else
 			_t2 -= TICK_FREQ;
 	}
@@ -246,7 +246,7 @@ void petio::operator=(uint8_t r) {
 		break;
 
 	case VIA + PCR:
-		CA2.write(r & 0x02);
+		CA2.set(r & 0x02);
 		break;
 
 	case VIA + VPORTB:

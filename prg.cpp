@@ -8,7 +8,7 @@
 #include <pia.h>
 
 #include "kbd.h"
-#include "port.h"
+#include "line.h"
 #include "petio.h"
 
 bool petio::load_prg()

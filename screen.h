@@ -9,7 +9,7 @@ public:
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
 
-	screen(port &upr): Memory::Device(sizeof(_mem)), _resolution(0), _upr(upr) {}
+	screen(Line &upr): Memory::Device(sizeof(_mem)), _resolution(0), _upr(upr) {}
 	void begin();
 
 private:
@@ -17,6 +17,6 @@ private:
 
 	uint8_t _mem[SCREEN_RAM_SIZE];
 	int _resolution;
-	port &_upr;
+	Line &_upr;
 };
 #endif
