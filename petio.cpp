@@ -14,15 +14,11 @@
 // see http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/PET-Interfaces.txt
 // and http://www.6502.org/users/andre/petindex/progmod.html
 
-// base is 0xe800
+// device offsets (base is 0xe800)
 #define PIA1	0x0010
 #define PIA2	0x0020
-#define PORTA	0x00
-#define CRA	0x01
-#define PORTB	0x02
-#define CRB	0x03
-
 #define VIA	0x0040
+
 #define VPORTB	0x00
 #define VPORTA	0x01
 #define DDRB	0x02
@@ -77,10 +73,6 @@ bool petio::start() {
 
 	return files.start();
 }
-
-#if !defined(ESP32) && !defined(ESP8266)
-#define IRAM_ATTR
-#endif
 
 void IRAM_ATTR petio::on_tick() {
 	io->tick();
@@ -148,16 +140,15 @@ uint8_t petio::read_porta() {
 }
 
 petio::operator uint8_t() {
+
+	if (PIA1 <= _acc && _acc < PIA2)
+		return PIA::read(_acc & 0x0f);
+
+	if (PIA2 <= _acc && _acc < VIA)
+		return 0x00;
+
 	uint8_t r = 0x00;
-
 	switch (_acc) {
-	case PIA1 + PORTB:
-	case PIA1 + PORTA:
-	case PIA1 + CRA:
-	case PIA1 + CRB:
-		r = PIA::read(_acc & 0x0f);
-		break;
-
 	case VIA + VPORTA:
 		// ~DAV + ~NRFD + ~NDAC
 		r = _porta;
@@ -234,17 +225,19 @@ void petio::write_porta(uint8_t r) {
 }
 
 void petio::operator=(uint8_t r) {
+
+	if (PIA1 <= _acc && _acc < PIA2) {
+		PIA::write(_acc & 0x0f, r);
+		return;
+	}
+
+	if (PIA2 <= _acc && _acc < VIA)
+		return;
+
 	if (VIA <= _acc && _acc <= VIA + 0x0f)
 		print(" >via ", _acc, r);
 
 	switch (_acc) {
-	case PIA1 + PORTB:
-	case PIA1 + PORTA:
-	case PIA1 + CRA:
-	case PIA1 + CRB:
-		PIA::write(_acc & 0x0f, r);
-		break;
-
 	case VIA + PCR:
 		CA2.set(r & 0x02);
 		break;
