@@ -61,25 +61,6 @@ void IRAM_ATTR petio::tick() {
 	VIA::tick();
 }
 
-static void print(const char *msg, Memory::address a)
-{
-#if defined(DEBUG_IO)
-	Serial.print(millis());
-	Serial.print(msg);
-	Serial.println(a, 16);
-#endif
-}
-
-static void print(const char *msg, Memory::address a, uint8_t r) {
-#if defined(DEBUG_IO)
-	Serial.print(millis());
-	Serial.print(msg);
-	Serial.print(a, 16);
-	Serial.print(' ');
-	Serial.println(r, 16);
-#endif
-}
-
 uint8_t petio::read_portb() {
 	return keyboard.read();
 }
@@ -99,11 +80,7 @@ petio::operator uint8_t() {
 	if (PIA2_OFF <= _acc && _acc < VIA_OFF)
 		return 0x00;
 
-	uint8_t r = VIA::read(_acc - VIA_OFF);
-	if (VIA_OFF <= _acc && _acc < VIA_OFF+ 0x10)
-		print(" <via ", _acc, r);
-
-	return r;
+	return VIA::read(_acc - VIA_OFF);
 }
 
 void petio::write_porta(uint8_t r) {
@@ -123,7 +100,7 @@ void petio::write_sr(uint8_t r) {
 
 void petio::write_acr(uint8_t r) {
 	VIA::write_acr(r);
-	if ((r & ACR_SHIFT_MASK) == 0x10)
+	if ((r & ACR_SHIFT_MASK) == ACR_SO_T2_RATE)
 		sound_on();
 	else
 		sound_off();
@@ -141,11 +118,10 @@ void petio::operator=(uint8_t r) {
 		return;
 	}
 
-	if (PIA2_OFF <= _acc && _acc < VIA_OFF)
+	if (PIA2_OFF <= _acc && _acc < VIA_OFF) {
+		// PIA2 NYI
 		return;
-
-	if (VIA_OFF <= _acc && _acc < VIA_OFF+0x10)
-		print(" >via ", _acc, r);
+	}
 
 	VIA::write(_acc - VIA_OFF, r);
 }

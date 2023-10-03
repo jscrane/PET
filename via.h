@@ -20,10 +20,12 @@ public:
 
 	void tick();
 
+	// acr
 	static const uint8_t ACR_SHIFT_MASK = 0x1c;
 	static const uint8_t ACR_T1_SET_PB7 = 0x80;
 	static const uint8_t ACR_T1_CONTINUOUS = 0x40;
 	static const uint8_t ACR_T2_COUNT_PB6 = 0x20;
+	static const uint8_t ACR_SO_T2_RATE = 0x10;
 
 	// ier and ifr bits
 	static const uint8_t INT_MASTER = 0x80;

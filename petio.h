@@ -42,11 +42,10 @@ private:
 	Line &_irq;
 	uint8_t _ticks;
 
-	// sound
 	void sound_on();
 	void sound_off();
-	void sound_freq(uint8_t p);
-	void sound_octave(uint8_t o);
+	void sound_freq(uint8_t);
+	void sound_octave(uint8_t);
 
 	uint8_t _octave;
 	uint32_t _freq;
