@@ -6,9 +6,9 @@
 #include <timed.h>
 #include <hardware.h>
 #include <pia.h>
+#include <line.h>
+#include <via.h>
 
-#include "line.h"
-#include "via.h"
 #include "kbd.h"
 #include "petio.h"
 
