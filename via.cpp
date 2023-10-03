@@ -234,7 +234,7 @@ void VIA::tick() {
 void VIA::set_int(uint8_t i) {
 	_ifr |= i;
 	if ((_ier & INT_MASTER) && (_ier & i))
-		_irq.set();
+		set_interrupt();
 }
 
 void VIA::clear_int(uint8_t i) {

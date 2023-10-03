@@ -3,7 +3,7 @@
 
 class VIA {
 public:
-	VIA(Line &irq): _irq(irq), _timer1(false), _timer2(false), _t1(0), _t2(0), _t1_latch(0), 
+	VIA(): _irq(0), _timer1(false), _timer2(false), _t1(0), _t2(0), _t1_latch(0),
 		_sr(0), _acr(0), _pcr(0), _ier(0), _ifr(0), _ddra(0), _ddrb(0), _porta(0), _portb(0) {}
 
 	virtual void reset() {
@@ -21,6 +21,8 @@ public:
 	void tick();
 
 	Line CA2;
+
+	void register_irq(Line &irq) { _irq = &irq; }
 
 	// acr
 	static const uint8_t ACR_SHIFT_MASK = 0x1c;
@@ -74,8 +76,10 @@ protected:
 	virtual uint8_t read_ier() { return _ier | 0x80; }
 	virtual uint8_t read_vporta_nh();
 
+	void set_interrupt() { if (_irq) _irq->set(); }
+
 private:
-	Line &_irq;
+	Line *_irq;
 
 	void set_int(uint8_t);
 	void clear_int(uint8_t);

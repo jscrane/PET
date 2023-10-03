@@ -7,7 +7,10 @@ class Line;
 // two PIAs and the VIA
 class petio: public Memory::Device, public PIA, public VIA {
 public:
-	petio(filer &files, Line &irq): Memory::Device(256), VIA(irq), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
+	petio(filer &files, Line &irq): Memory::Device(256), _ticks(0), _octave(0), _freq(0), files(files) {
+		VIA::register_irq(irq);
+	}
+
 	void reset();
 	bool start();
 
@@ -36,7 +39,6 @@ protected:
 private:
 	void tick();
 
-	Line &_irq;
 	uint8_t _ticks;
 
 	void sound_on();

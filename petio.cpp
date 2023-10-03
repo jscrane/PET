@@ -16,9 +16,9 @@
 // and http://www.6502.org/users/andre/petindex/progmod.html
 
 // device offsets (base is 0xe800)
-#define PIA1_OFF	0x0010
-#define PIA2_OFF	0x0020
-#define VIA_OFF		0x0040
+#define PIA1_OFFSET	0x0010
+#define PIA2_OFFSET	0x0020
+#define VIA_OFFSET		0x0040
 
 // via port-b
 #define VIDEO_RETRACE	0x20
@@ -54,7 +54,7 @@ void IRAM_ATTR petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
 		VIA::write_vportb_in_bit(VIDEO_RETRACE, true);
-		_irq.set();
+		VIA::set_interrupt();
 	} else
 		VIA::write_vportb_in_bit(VIDEO_RETRACE, false);
 
@@ -74,13 +74,13 @@ uint8_t petio::read_porta() {
 
 petio::operator uint8_t() {
 
-	if (PIA1_OFF <= _acc && _acc < PIA2_OFF)
+	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET)
 		return PIA::read(_acc & 0x0f);
 
-	if (PIA2_OFF <= _acc && _acc < VIA_OFF)
+	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET)
 		return 0x00;
 
-	return VIA::read(_acc - VIA_OFF);
+	return VIA::read(_acc - VIA_OFFSET);
 }
 
 void petio::write_porta(uint8_t r) {
@@ -108,17 +108,17 @@ void petio::write_t2lo(uint8_t r) {
 
 void petio::operator=(uint8_t r) {
 
-	if (PIA1_OFF <= _acc && _acc < PIA2_OFF) {
+	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET) {
 		PIA::write(_acc & 0x0f, r);
 		return;
 	}
 
-	if (PIA2_OFF <= _acc && _acc < VIA_OFF) {
+	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET) {
 		// PIA2 NYI
 		return;
 	}
 
-	VIA::write(_acc - VIA_OFF, r);
+	VIA::write(_acc - VIA_OFFSET, r);
 }
 
 void petio::sound_off() {
