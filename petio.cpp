@@ -88,11 +88,6 @@ void petio::write_porta(uint8_t r) {
 	PIA::write_porta(r);
 }
 
-void petio::write_pcr(uint8_t r) {
-	VIA::write_pcr(r);
-	CA2.set(r & 0x02);
-}
-
 void petio::write_sr(uint8_t r) {
 	VIA::write_sr(r);
 	sound_octave(r);

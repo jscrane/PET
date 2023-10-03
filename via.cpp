@@ -116,6 +116,11 @@ void VIA::write_sr(uint8_t b) {
 	clear_int(INT_SR);
 }
 
+void VIA::write_pcr(uint8_t b) {
+	_pcr = b;
+	CA2.set(b & 0x02);
+}
+
 void VIA::write_acr(uint8_t b) {
 	_acr = b;
 	if (b & ACR_T1_CONTINUOUS)
@@ -130,7 +135,7 @@ void VIA::write_ier(uint8_t b) {
 }
 
 void VIA::write_vporta_nh(uint8_t b) {
-	_porta = b;
+	_porta = (b & _ddra);
 }
 
 uint8_t VIA::read(Memory::address a) {
@@ -195,8 +200,7 @@ uint8_t VIA::read_sr() {
 }
 
 uint8_t VIA::read_vporta_nh() {
-	// FIXME
-	return 0x00;
+	return (_porta & _ddra) | ~_ddra;
 }
 
 // FIXME: calculate from millis()

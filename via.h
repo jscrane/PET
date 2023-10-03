@@ -20,6 +20,8 @@ public:
 
 	void tick();
 
+	Line CA2;
+
 	// acr
 	static const uint8_t ACR_SHIFT_MASK = 0x1c;
 	static const uint8_t ACR_T1_SET_PB7 = 0x80;
@@ -50,7 +52,7 @@ protected:
 	virtual void write_t2hi(uint8_t);
 	virtual void write_sr(uint8_t);
 	virtual void write_acr(uint8_t b);
-	virtual void write_pcr(uint8_t b) { _pcr = b; }
+	virtual void write_pcr(uint8_t b);
 	virtual void write_ifr(uint8_t b) { _ifr &= ~b; }
 	virtual void write_ier(uint8_t);
 	virtual void write_vporta_nh(uint8_t);

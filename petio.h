@@ -16,8 +16,6 @@ public:
 
 	static void on_tick();
 
-	Line CA2;
-
 	filer &files;
 	kbd keyboard;
 
@@ -31,7 +29,6 @@ protected:
 	virtual void write_porta(uint8_t);
 
 	// VIA
-	virtual void write_pcr(uint8_t);
 	virtual void write_sr(uint8_t);
 	virtual void write_acr(uint8_t);
 	virtual void write_t2lo(uint8_t);
