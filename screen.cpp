@@ -6,7 +6,7 @@
 #include <hardware.h>
 
 #include "config.h"
-#include "port.h"
+#include "line.h"
 #include "screen.h"
 #include CHARSET_ROM
 
@@ -48,7 +48,7 @@ void screen::_set(Memory::address a, uint8_t c)
 	uint8_t ch = (c & 0x7f);
 	bool invert = (c & 0x80), inverted = (cm & 0x80);
 	cm &= 0x7f;
-	if (_upr.read()) {
+	if (_upr) {
 		ch |= 0x80;
 		cm |= 0x80;
 	}

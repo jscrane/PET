@@ -3,9 +3,11 @@
 #include <SPI.h>
 #include <r65emu.h>
 #include <r6502.h>
+#include <pia.h>
 
 #include "config.h"
-#include "port.h"
+#include "line.h"
+#include "via.h"
 #include "screen.h"
 #include "kbd.h"
 #include "petio.h"
@@ -38,7 +40,7 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
-port irq;
+Line irq;
 ram pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files, irq);
@@ -146,8 +148,8 @@ void loop() {
 #else
 		cpu.run(CPU_INSTRUCTIONS);
 #endif
-		if (irq.read()) {
-			irq.write(false);
+		if (irq) {
+			irq.clear();
 			cpu.raise(0);
 		}
 	}

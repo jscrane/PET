@@ -5,50 +5,23 @@
 #include <filer.h>
 #include <timed.h>
 #include <hardware.h>
+#include <pia.h>
 
-#include "port.h"
+#include "line.h"
+#include "via.h"
 #include "kbd.h"
 #include "petio.h"
 
 // see http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/PET-Interfaces.txt
+// and http://www.6502.org/users/andre/petindex/progmod.html
 
-// base is 0xe800
-#define PIA1	0x0010
-#define PIA2	0x0020
-#define PORTA	0x00
-#define CRA	0x01
-#define PORTB	0x02
-#define CRB	0x03
+// device offsets (base is 0xe800)
+#define PIA1_OFFSET	0x0010
+#define PIA2_OFFSET	0x0020
+#define VIA_OFFSET		0x0040
 
-#define VIA	0x0040
-#define VPORTB	0x00
-#define VPORTA	0x01
-#define DDRB	0x02
-#define DDRA	0x03
-#define T1LO	0x04
-#define T1HI	0x05
-#define T1LLO	0x06
-#define T1LHI	0x07
-#define T2LO	0x08
-#define T2HI	0x09
-#define SHIFT	0x0a
-#define ACR	0x0b
-#define PCR	0x0c
-#define IFR	0x0d
-#define IER	0x0e
-
-#define IER_MASTER	0x80
-#define IER_TIMER1	0x40
-#define IER_TIMER2	0x20
-#define IER_CB1_ACTIVE	0x10
-#define IER_CB2_ACTIVE	0x08
-#define IER_SHIFT_REG	0x04
-#define IER_CA1_ACTIVE	0x02
-#define IER_CA2_ACTIVE	0x01
-
-#define VIA_VIDEO_RETRACE	0x20
-#define VIA_ACR_SHIFT_MASK	0x1c
-#define VIA_ACR_T1_CONTINUOUS	0x40
+// via port-b
+#define VIDEO_RETRACE	0x20
 
 static petio *io;
 
@@ -59,12 +32,10 @@ static petio *io;
 #define SYS_TICKS	20
 
 void petio::reset() {
-	_acr = _ifr = _ier = 0x00;
-	_t1 = _t2 = 0;
-	_timer1 = _timer2 = false;
-
 	sound_off();
 	keyboard.reset();
+	PIA::reset();
+	VIA::reset();
 }
 
 bool petio::start() {
@@ -75,10 +46,6 @@ bool petio::start() {
 	return files.start();
 }
 
-#if !defined(ESP32) && !defined(ESP8266)
-#define IRAM_ATTR
-#endif
-
 void IRAM_ATTR petio::on_tick() {
 	io->tick();
 }
@@ -86,243 +53,72 @@ void IRAM_ATTR petio::on_tick() {
 void IRAM_ATTR petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
-		_portb |= VIA_VIDEO_RETRACE;
-		_irq.write(true);
+		VIA::write_vportb_in_bit(VIDEO_RETRACE, true);
+		VIA::set_interrupt();
 	} else
-		_portb &= ~VIA_VIDEO_RETRACE;
+		VIA::write_vportb_in_bit(VIDEO_RETRACE, false);
 
-	if (_timer1) {
-		if (_t1 < TICK_FREQ) {
-			_t1 = 0;
-			_timer1 = false;
-			_ifr |= IER_TIMER1;
-			if ((_ier & IER_MASTER) && (_ier & IER_TIMER1))
-				_irq.write(true);
-		} else
-			_t1 -= TICK_FREQ;
-	}
-
-	if (_timer2) {
-		if (_t2 < TICK_FREQ) {
-			_t2 = 0;
-			_timer2 = false;
-			_ifr |= IER_TIMER2;
-			if ((_ier & IER_MASTER) && (_ier & IER_TIMER2))
-				_irq.write(true);
-		} else
-			_t2 -= TICK_FREQ;
-	}
+	VIA::tick();
 }
 
-static void print(const char *msg, Memory::address a)
-{
-#if defined(DEBUGGING)
-	Serial.print(millis());
-	Serial.print(msg);
-	Serial.println(a, 16);
-#endif
+uint8_t petio::read_portb() {
+	return keyboard.read();
 }
 
-static void print(const char *msg, Memory::address a, uint8_t r) {
-#if defined(DEBUGGING)
-	Serial.print(millis());
-	Serial.print(msg);
-	Serial.print(a, 16);
-	Serial.print(' ');
-	Serial.println(r, 16);
-#endif
+uint8_t petio::read_porta() {
+	// diagnostic sense high (otherwise get monitor)
+	// with cassette sense get "press play on tape #n"
+	//return 0x80 + keyboard.row();
+	return PIA::read_porta() | 0x80;
 }
 
-uint8_t petio::read() {
-	uint8_t r = 0x00;
+petio::operator uint8_t() {
 
-	switch (_acc) {
-	// keyboard in
-	case PIA1 + PORTB:
-		r = keyboard.read();
-		break;
+	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET)
+		return PIA::read(_acc & 0x0f);
 
-	case PIA1 + PORTA:
-		// diagnostic sense high (otherwise get monitor)
-		// with cassette sense get "press play on tape #n"
-		r = 0x80 + keyboard.row();
-		break;
+	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET)
+		return 0x00;
 
-	case PIA1 + CRA:
-		// video sync in???
-//		r = 0x87;
-		break;
+	return VIA::read(_acc - VIA_OFFSET);
+}
 
-	case PIA1 + CRB:
-		// FIXME: this is required for tape
-		break;
+void petio::write_porta(uint8_t r) {
+	keyboard.write(r & 0x0f);
+	PIA::write_porta(r);
+}
 
-	case VIA + VPORTA:
-		// ~DAV + ~NRFD + ~NDAC
-		r = _porta;
-		_ifr &= ~(IER_CA1_ACTIVE | IER_CA2_ACTIVE);
-		break;
+void petio::write_sr(uint8_t r) {
+	VIA::write_sr(r);
+	sound_octave(r);
+}
 
-	case VIA + VPORTB:
-		// screen retrace in
-		r = _portb;
-		_ifr &= ~(IER_CB1_ACTIVE | IER_CB2_ACTIVE);
-		break;
+void petio::write_acr(uint8_t r) {
+	VIA::write_acr(r);
+	if ((r & ACR_SHIFT_MASK) == ACR_SO_T2_RATE)
+		sound_on();
+	else
+		sound_off();
+}
 
-	case VIA + SHIFT:
-		print(" shift ", _acc);
-		_ifr &= ~IER_SHIFT_REG;
-		break;
+void petio::write_t2lo(uint8_t r) {
+	VIA::write_t2lo(r);
+	sound_freq(r);
+}
 
-	case VIA + ACR:
-		print(" acr ", _acc);
-		// acr bits 5-7 relate to timers
-		r = _acr;
-		break;
+void petio::operator=(uint8_t r) {
 
-	case VIA + IER:
-		print(" ifr ", _acc);
-		r = _ier | 0x80;
-		break;
-
-	case VIA + IFR:
-		print(" ifr ", _acc);
-		r = _ifr;
-		break;
-
-	case VIA + T1LO:
-		r = (_t1 & 0xff);
-		_ifr &= ~IER_TIMER1;
-		break;
-
-	case VIA + T1HI:
-		r = (_t1 / 0xff);
-		break;
-
-	case VIA + T1LLO:
-		r = (_t1_latch & 0xff);
-		break;
-
-	case VIA + T1LHI:
-		r = (_t1_latch / 0xff);
-		break;
-
-	case VIA + T2LO:
-		r = (_t2 & 0xff);
-		_ifr &= ~IER_TIMER2;
-		break;
-
-	case VIA + T2HI:
-		r = (_t2 / 0xff);
-		break;
-
-	default:
-		// some other device...
-		print(" <??? ", _acc);
-		break;
+	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET) {
+		PIA::write(_acc & 0x0f, r);
+		return;
 	}
-	if (VIA < _acc && _acc <= VIA + 0x0f)
-		print(" <via ", _acc, r);
 
-	return r;
-}
-
-void petio::write(uint8_t r) {
-	if (VIA < _acc && _acc <= VIA + 0x0f)
-		print(" >via ", _acc, r);
-
-	switch (_acc) {
-	case PIA1 + PORTA:
-		keyboard.write(r & 0x0f);
-		break;
-
-	case PIA1 + CRB:
-		// for now
-		break;
-
-	case VIA + PCR:
-		CA2.write(r & 0x02);
-		break;
-
-	case VIA + VPORTB:
-		_portb = (r & _ddrb);
-		_ifr &= ~(IER_CB1_ACTIVE | IER_CB2_ACTIVE);
-		break;
-
-	case VIA + VPORTA:
-		_porta = (r & _ddra);
-		_ifr &= ~(IER_CA1_ACTIVE | IER_CA2_ACTIVE);
-		break;
-
-	case VIA + DDRB:
-		_ddrb = r;
-		break;
-
-	case VIA + DDRA:
-		_ddra = r;
-		break;
-
-	case VIA + SHIFT:
-		print(" shift ", _acc, r);
-		sound_octave(r);
-		_ifr &= ~IER_SHIFT_REG;
-		break;
-
-	case VIA + ACR:
-		print(" acr ", _acc, r);
-		_acr = r;
-		if ((r & VIA_ACR_SHIFT_MASK) == 0x10)
-			sound_on();
-		else
-			sound_off();
-		if (r & VIA_ACR_T1_CONTINUOUS)
-			_timer1 = true;
-		break;
-
-	case VIA + IER:
-		if (r & 0x80)
-			_ier |= r & 0x7f;
-		else
-			_ier &= ~(r & 0x7f);
-		break;
-
-	case VIA + IFR:
-		_ifr &= ~r;
-		break;
-
-	case VIA + T1LO:
-	case VIA + T1LLO:
-		_t1_latch = (_t1_latch & 0xff00) | r;
-		break;
-
-	case VIA + T1LHI:
-		_t1_latch = (_t1_latch & 0x00ff) | (r << 8);
-		_ifr &= ~IER_TIMER1;
-		break;
-
-	case VIA + T1HI:
-		_t1 = _t1_latch;
-		_ifr &= ~IER_TIMER1;
-		_timer1 = true;
-		break;
-
-	case VIA + T2LO:
-		_t2 = r;
-		_timer2 = false;
-		_ifr &= ~IER_TIMER2;
-		sound_freq(r);
-		break;
-
-	case VIA + T2HI:
-		_t2 += (r << 8);
-		_ifr &= ~IER_TIMER2;
-		_timer2 = true;
-		break;
-
-	default:
-		print(" >??? ", _acc, r);
-		break;
+	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET) {
+		// PIA2 NYI
+		return;
 	}
+
+	VIA::write(_acc - VIA_OFFSET, r);
 }
 
 void petio::sound_off() {
@@ -356,4 +152,34 @@ void petio::sound_freq(uint8_t p) {
 void petio::sound_octave(uint8_t o) {
 	_octave = o;
 	sound_on();
+}
+
+bool petio::load_prg()
+{
+	if (!files.more())
+		return false;
+
+	uint8_t lo = files.read();
+	uint8_t hi = files.read();
+	Memory::address a = lo + (hi << 8);
+	while (files.more())
+		memory[a++] = files.read();
+	
+	// based on mem_get/set_basic_text() from vice/petmem.c
+	memory[0xc7] = memory[0x28];
+	memory[0xc8] = memory[0x29];
+
+	lo = (uint8_t)(a & 0xff);
+	memory[0x2a] = lo;
+	memory[0x2c] = lo;
+	memory[0x2e] = lo;
+	memory[0xc9] = lo;
+
+	hi = (uint8_t)(a >> 8);
+	memory[0x2b] = hi;
+	memory[0x2d] = hi;
+	memory[0x2f] = hi;
+	memory[0xca] = hi;
+	
+	return true;
 }
