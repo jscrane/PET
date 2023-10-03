@@ -80,9 +80,13 @@ private:
 	void set_int(uint8_t);
 	void clear_int(uint8_t);
 
+	void start_timer1();
+	void start_timer2();
 	volatile bool _timer1, _timer2;
 	volatile uint16_t _t1, _t2;
 	uint16_t _t1_latch;
+	volatile uint32_t _t1_tick, _t2_tick;
+
 	uint8_t _sr, _acr, _pcr, _ier, _ifr, _ddra, _ddrb;
 	volatile uint8_t _porta, _portb;
 };

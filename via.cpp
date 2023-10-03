@@ -95,7 +95,7 @@ void VIA::write_t1lhi(uint8_t b) {
 
 void VIA::write_t1hi(uint8_t b) {
 	_t1 = _t1_latch;
-	_timer1 = true;
+	start_timer1();
 	clear_int(INT_TIMER1);
 }
 
@@ -107,7 +107,7 @@ void VIA::write_t2lo(uint8_t b) {
 
 void VIA::write_t2hi(uint8_t b) {
 	_t2 += (b << 8);
-	_timer2 = true;
+	start_timer2();
 	clear_int(INT_TIMER2);
 }
 
@@ -124,7 +124,7 @@ void VIA::write_pcr(uint8_t b) {
 void VIA::write_acr(uint8_t b) {
 	_acr = b;
 	if (b & ACR_T1_CONTINUOUS)
-		_timer1 = true;
+		start_timer1();
 }
 
 void VIA::write_ier(uint8_t b) {
@@ -203,27 +203,31 @@ uint8_t VIA::read_vporta_nh() {
 	return (_porta & _ddra) | ~_ddra;
 }
 
-// FIXME: calculate from millis()
-static const uint16_t interval = 1000;
-
 void VIA::tick() {
 
+	uint32_t now = millis();
 	if (_timer1) {
+		uint32_t interval = now - _t1_tick;
 		if (_t1 < interval) {
 			_t1 = 0;
 			_timer1 = false;
 			set_int(INT_TIMER1);
-		} else
+		} else {
 			_t1 -= interval;
+			_t1_tick = now;
+		}
 	}
 
 	if (_timer2) {
+		uint32_t interval = now - _t1_tick;
 		if (_t2 < interval) {
 			_t2 = 0;
 			_timer2 = false;
 			set_int(INT_TIMER2);
-		} else
+		} else {
 			_t2 -= interval;
+			_t2_tick = now;
+		}
 	}
 }
 
@@ -249,4 +253,14 @@ void VIA::write_vportb_in_bit(uint8_t bit, bool state) {
 		_portb |= bit;
 	else
 		_portb &= ~bit;
+}
+
+void VIA::start_timer1() {
+	_t1_tick = millis();
+	_timer1 = true;
+}
+
+void VIA::start_timer2() {
+	_t2_tick = millis();
+	_timer2 = true;
 }
