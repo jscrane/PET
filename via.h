@@ -15,7 +15,25 @@ public:
 	void write(Memory::address, uint8_t);
 	uint8_t read(Memory::address);
 
+	void write_vporta_in_bit(uint8_t, bool);
+	void write_vportb_in_bit(uint8_t, bool);
+
 	void tick();
+
+	static const uint8_t ACR_SHIFT_MASK = 0x1c;
+	static const uint8_t ACR_T1_SET_PB7 = 0x80;
+	static const uint8_t ACR_T1_CONTINUOUS = 0x40;
+	static const uint8_t ACR_T2_COUNT_PB6 = 0x20;
+
+	// ier and ifr bits
+	static const uint8_t INT_MASTER = 0x80;
+	static const uint8_t INT_TIMER1	= 0x40;
+	static const uint8_t INT_TIMER2	= 0x20;
+	static const uint8_t INT_CB1_ACTIVE = 0x10;
+	static const uint8_t INT_CB2_ACTIVE = 0x08;
+	static const uint8_t INT_SR = 0x04;
+	static const uint8_t INT_CA1_ACTIVE = 0x02;
+	static const uint8_t INT_CA2_ACTIVE = 0x01;
 
 protected:
 	virtual void write_vportb(uint8_t);
@@ -29,7 +47,7 @@ protected:
 	virtual void write_t2lo(uint8_t);
 	virtual void write_t2hi(uint8_t);
 	virtual void write_sr(uint8_t);
-	virtual void write_acr(uint8_t b) { _acr = b; }
+	virtual void write_acr(uint8_t b);
 	virtual void write_pcr(uint8_t b) { _pcr = b; }
 	virtual void write_ifr(uint8_t b) { _ifr &= ~b; }
 	virtual void write_ier(uint8_t);
@@ -51,15 +69,6 @@ protected:
 	virtual uint8_t read_ifr() { return _ifr; }
 	virtual uint8_t read_ier() { return _ier | 0x80; }
 	virtual uint8_t read_vporta_nh();
-
-	static const uint8_t INT_MASTER = 0x80;
-	static const uint8_t INT_TIMER1	= 0x40;
-	static const uint8_t INT_TIMER2	= 0x20;
-	static const uint8_t INT_CB1_ACTIVE = 0x10;
-	static const uint8_t INT_CB2_ACTIVE = 0x08;
-	static const uint8_t INT_SR = 0x04;
-	static const uint8_t INT_CA1_ACTIVE = 0x02;
-	static const uint8_t INT_CA2_ACTIVE = 0x01;
 
 private:
 	Line &_irq;

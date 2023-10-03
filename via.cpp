@@ -21,11 +21,6 @@
 #define IER	0x0e
 #define VPORTA_NH	0x0f
 
-#define ACR_SHIFT_MASK	0x1c
-#define ACR_T1_SET_PB7	0x80
-#define ACR_T1_CONTINUOUS	0x40
-#define ACR_T2_COUNT_PB6	0x20
-
 void VIA::write(Memory::address a, uint8_t b) {
 	switch (a & 0x0f) {
 	case VPORTB:
@@ -118,10 +113,17 @@ void VIA::write_t2hi(uint8_t b) {
 
 void VIA::write_sr(uint8_t b) {
 	_sr = b;
+	clear_int(INT_SR);
+}
+
+void VIA::write_acr(uint8_t b) {
+	_acr = b;
+	if (b & ACR_T1_CONTINUOUS)
+		_timer1 = true;
 }
 
 void VIA::write_ier(uint8_t b) {
-	if (b & 0x80)
+	if (b & INT_MASTER)
 		_ier |= b & 0x7f;
 	else
 		_ier &= ~(b & 0x7f);
@@ -229,4 +231,18 @@ void VIA::set_int(uint8_t i) {
 
 void VIA::clear_int(uint8_t i) {
 	_ifr &= ~i;
+}
+
+void VIA::write_vporta_in_bit(uint8_t bit, bool state) {
+	if (state)
+		_porta |= bit;
+	else
+		_porta &= ~bit;
+}
+
+void VIA::write_vportb_in_bit(uint8_t bit, bool state) {
+	if (state)
+		_portb |= bit;
+	else
+		_portb &= ~bit;
 }

@@ -30,6 +30,12 @@ protected:
 	virtual uint8_t read_porta();
 	virtual void write_porta(uint8_t);
 
+	// VIA
+	virtual void write_pcr(uint8_t);
+	virtual void write_sr(uint8_t);
+	virtual void write_acr(uint8_t);
+	virtual void write_t2lo(uint8_t);
+
 private:
 	void tick();
 
@@ -44,13 +50,6 @@ private:
 
 	uint8_t _octave;
 	uint32_t _freq;
-
-	// via
-	volatile bool _timer1, _timer2;
-	volatile uint16_t _t1, _t2;
-	uint16_t _t1_latch;
-	uint8_t _acr, _ier, _ifr, _ddra, _ddrb;
-	volatile uint8_t _porta, _portb;
 };
 
 #endif
