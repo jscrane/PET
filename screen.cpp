@@ -4,9 +4,9 @@
 #include <memory.h>
 #include <display.h>
 #include <hardware.h>
+#include <line.h>
 
 #include "config.h"
-#include "line.h"
 #include "screen.h"
 #include CHARSET_ROM
 
