@@ -5,9 +5,9 @@ class Line;
 
 // this occupies all of the addresses (and more) dedicated to the 
 // two PIAs and the VIA
-class petio: public Memory::Device, public PIA {
+class petio: public Memory::Device, public PIA, public VIA {
 public:
-	petio(filer &files, Line &irq): Memory::Device(256), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
+	petio(filer &files, Line &irq): Memory::Device(256), VIA(irq), _irq(irq), _ticks(0), _octave(0), _freq(0), files(files) {}
 	void reset();
 	bool start();
 

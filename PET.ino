@@ -7,6 +7,7 @@
 
 #include "config.h"
 #include "line.h"
+#include "via.h"
 #include "screen.h"
 #include "kbd.h"
 #include "petio.h"

@@ -9,6 +9,7 @@
 
 #include "kbd.h"
 #include "line.h"
+#include "via.h"
 #include "petio.h"
 
 bool petio::load_prg()

@@ -8,6 +8,7 @@
 #include <pia.h>
 
 #include "line.h"
+#include "via.h"
 #include "kbd.h"
 #include "petio.h"
 
@@ -15,9 +16,9 @@
 // and http://www.6502.org/users/andre/petindex/progmod.html
 
 // device offsets (base is 0xe800)
-#define PIA1	0x0010
-#define PIA2	0x0020
-#define VIA	0x0040
+#define PIA1_OFF	0x0010
+#define PIA2_OFF	0x0020
+#define VIA_OFF		0x0040
 
 #define VPORTB	0x00
 #define VPORTA	0x01
@@ -64,6 +65,7 @@ void petio::reset() {
 	sound_off();
 	keyboard.reset();
 	PIA::reset();
+	VIA::reset();
 }
 
 bool petio::start() {
@@ -141,70 +143,70 @@ uint8_t petio::read_porta() {
 
 petio::operator uint8_t() {
 
-	if (PIA1 <= _acc && _acc < PIA2)
+	if (PIA1_OFF <= _acc && _acc < PIA2_OFF)
 		return PIA::read(_acc & 0x0f);
 
-	if (PIA2 <= _acc && _acc < VIA)
+	if (PIA2_OFF <= _acc && _acc < VIA_OFF)
 		return 0x00;
 
 	uint8_t r = 0x00;
-	switch (_acc) {
-	case VIA + VPORTA:
+	switch (_acc - VIA_OFF) {
+	case VPORTA:
 		// ~DAV + ~NRFD + ~NDAC
 		r = _porta;
 		_ifr &= ~(IER_CA1_ACTIVE | IER_CA2_ACTIVE);
 		break;
 
-	case VIA + VPORTB:
+	case VPORTB:
 		// screen retrace in
 		r = _portb;
 		_ifr &= ~(IER_CB1_ACTIVE | IER_CB2_ACTIVE);
 		break;
 
-	case VIA + SHIFT:
+	case SHIFT:
 		print(" shift ", _acc);
 		_ifr &= ~IER_SHIFT_REG;
 		break;
 
-	case VIA + ACR:
+	case ACR:
 		print(" acr ", _acc);
 		// acr bits 5-7 relate to timers
 		r = _acr;
 		break;
 
-	case VIA + IER:
+	case IER:
 		print(" ifr ", _acc);
 		r = _ier | 0x80;
 		break;
 
-	case VIA + IFR:
+	case IFR:
 		print(" ifr ", _acc);
 		r = _ifr;
 		break;
 
-	case VIA + T1LO:
+	case T1LO:
 		r = (_t1 & 0xff);
 		_ifr &= ~IER_TIMER1;
 		break;
 
-	case VIA + T1HI:
+	case T1HI:
 		r = (_t1 / 0xff);
 		break;
 
-	case VIA + T1LLO:
+	case T1LLO:
 		r = (_t1_latch & 0xff);
 		break;
 
-	case VIA + T1LHI:
+	case T1LHI:
 		r = (_t1_latch / 0xff);
 		break;
 
-	case VIA + T2LO:
+	case T2LO:
 		r = (_t2 & 0xff);
 		_ifr &= ~IER_TIMER2;
 		break;
 
-	case VIA + T2HI:
+	case T2HI:
 		r = (_t2 / 0xff);
 		break;
 
@@ -213,7 +215,7 @@ petio::operator uint8_t() {
 		print(" <??? ", _acc);
 		break;
 	}
-	if (VIA <= _acc && _acc <= VIA + 0x0f)
+	if (VIA_OFF <= _acc && _acc < VIA_OFF+ 0x10)
 		print(" <via ", _acc, r);
 
 	return r;
@@ -226,47 +228,47 @@ void petio::write_porta(uint8_t r) {
 
 void petio::operator=(uint8_t r) {
 
-	if (PIA1 <= _acc && _acc < PIA2) {
+	if (PIA1_OFF <= _acc && _acc < PIA2_OFF) {
 		PIA::write(_acc & 0x0f, r);
 		return;
 	}
 
-	if (PIA2 <= _acc && _acc < VIA)
+	if (PIA2_OFF <= _acc && _acc < VIA_OFF)
 		return;
 
-	if (VIA <= _acc && _acc <= VIA + 0x0f)
+	if (VIA_OFF <= _acc && _acc < VIA_OFF+0x10)
 		print(" >via ", _acc, r);
 
-	switch (_acc) {
-	case VIA + PCR:
+	switch (_acc - VIA_OFF) {
+	case PCR:
 		CA2.set(r & 0x02);
 		break;
 
-	case VIA + VPORTB:
+	case VPORTB:
 		_portb = (r & _ddrb);
 		_ifr &= ~(IER_CB1_ACTIVE | IER_CB2_ACTIVE);
 		break;
 
-	case VIA + VPORTA:
+	case VPORTA:
 		_porta = (r & _ddra);
 		_ifr &= ~(IER_CA1_ACTIVE | IER_CA2_ACTIVE);
 		break;
 
-	case VIA + DDRB:
+	case DDRB:
 		_ddrb = r;
 		break;
 
-	case VIA + DDRA:
+	case DDRA:
 		_ddra = r;
 		break;
 
-	case VIA + SHIFT:
+	case SHIFT:
 		print(" shift ", _acc, r);
 		sound_octave(r);
 		_ifr &= ~IER_SHIFT_REG;
 		break;
 
-	case VIA + ACR:
+	case ACR:
 		print(" acr ", _acc, r);
 		_acr = r;
 		if ((r & VIA_ACR_SHIFT_MASK) == 0x10)
@@ -277,41 +279,41 @@ void petio::operator=(uint8_t r) {
 			_timer1 = true;
 		break;
 
-	case VIA + IER:
+	case IER:
 		if (r & 0x80)
 			_ier |= r & 0x7f;
 		else
 			_ier &= ~(r & 0x7f);
 		break;
 
-	case VIA + IFR:
+	case IFR:
 		_ifr &= ~r;
 		break;
 
-	case VIA + T1LO:
-	case VIA + T1LLO:
+	case T1LO:
+	case T1LLO:
 		_t1_latch = (_t1_latch & 0xff00) | r;
 		break;
 
-	case VIA + T1LHI:
+	case T1LHI:
 		_t1_latch = (_t1_latch & 0x00ff) | (r << 8);
 		_ifr &= ~IER_TIMER1;
 		break;
 
-	case VIA + T1HI:
+	case T1HI:
 		_t1 = _t1_latch;
 		_ifr &= ~IER_TIMER1;
 		_timer1 = true;
 		break;
 
-	case VIA + T2LO:
+	case T2LO:
 		_t2 = r;
 		_timer2 = false;
 		_ifr &= ~IER_TIMER2;
 		sound_freq(r);
 		break;
 
-	case VIA + T2HI:
+	case T2HI:
 		_t2 += (r << 8);
 		_ifr &= ~IER_TIMER2;
 		_timer2 = true;
