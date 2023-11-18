@@ -41,7 +41,7 @@ prom edit(edit2, 2048);
 #endif
 
 Line irq;
-ram pages[RAM_PAGES];
+ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files, irq);
 screen screen(io.CA2);
@@ -65,7 +65,7 @@ void setup() {
 	hardware_init(cpu);
 
 	for (int i = 0; i < RAM_PAGES; i++)
-		memory.put(pages[i], i * ram::page_size);
+		memory.put(pages[i], i * ram<>::page_size);
 
 #if defined(USE_SPIRAM)
 	memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
