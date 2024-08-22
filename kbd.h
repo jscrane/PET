@@ -1,7 +1,7 @@
 #ifndef __KBD_H
 #define __KBD_H
 
-class kbd: public Keyboard {
+class kbd: public matrix_keyboard {
 public:
 	kbd(): _row(0), _ctrl(false), _shift(false) {}
 

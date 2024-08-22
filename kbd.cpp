@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <stdint.h>
+#include <hardware.h>
 #include <keyboard.h>
 #include "kbd.h"
 
@@ -83,10 +84,9 @@ void kbd::_reset(uint8_t k) {
 
 void kbd::up(uint8_t scan) {
 
-#if defined(DEBUGGING)
-	Serial.printf("key up: %02x", scan);
-	Serial.println();
-#endif
+	DBG(printf("key up: %02x", scan));
+	DBG(println());
+
 	if (_ext) {
 		_ext = false;
 		switch(scan) {
@@ -128,10 +128,10 @@ void kbd::_set(uint8_t k) {
 }
 
 void kbd::down(uint8_t scan) {
-#if defined(DEBUGGING)
-	Serial.printf("key down: %02x", scan);
-	Serial.println();
-#endif
+
+	DBG(printf("key down: %02x", scan));
+	DBG(println());
+
 	if (scan == 0xe0)
 		_ext = true;
 	else if (_ext) {

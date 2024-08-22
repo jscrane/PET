@@ -8,3 +8,4 @@ libcore.a
 .*.swp
 .build
 *.txt.mk
+serialout.txt

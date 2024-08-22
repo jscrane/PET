@@ -40,6 +40,7 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
+ps2_kbd kbd;
 Line irq;
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
@@ -53,14 +54,47 @@ bool reset() {
 
 	bool sd = hardware_reset();
 	io.reset();
+	kbd.reset();
 	screen.begin();
 	return sd;
 }
 
+void function_keys(uint8_t key) {
+
+	char buf[32];
+	switch (key) {
+	case 1:
+		reset();
+		break;
+	case 2:
+		filename = io.files.advance();
+		screen.status(filename? filename: "No file");
+		break;
+	case 3:
+		filename = io.files.rewind();
+		screen.status(filename? filename: "No file");
+		break;
+	case 4:
+		if (io.load_prg())
+			snprintf(buf, sizeof(buf), "Loaded %s", filename);
+		else
+			snprintf(buf, sizeof(buf), "Failed to load %s", filename);
+		screen.status(buf);
+		break;
+	case 6:
+		screen.status(io.files.checkpoint());
+		break;
+	case 7:
+		if (filename)
+			io.files.restore(filename);
+		break;
+	case 10:
+		hardware_debug_cpu();
+		break;
+	}
+}
+
 void setup() {
-#if defined(DEBUGGING) || defined(CPU_DEBUG)
-	Serial.begin(115200);
-#endif
 
 	hardware_init(cpu);
 
@@ -81,6 +115,8 @@ void setup() {
 	memory.put(edit, 0xe000);
 	memory.put(kernal, 0xf000);
 
+	kbd.register_fnkey_handler(function_keys);
+
 	bool sd = reset();
 
 	if (!sd)
@@ -90,68 +126,11 @@ void setup() {
 }
 
 void loop() {
-#if defined(CPU_DEBUG)
-	static bool cpu_debug;
-#endif
 
-	if (ps2.available()) {
-		unsigned scan = ps2.read2();
-		uint8_t key = scan & 0xff;
-		if (is_down(scan))
-			io.keyboard.down(key);
-		else {
-			char buf[32];
-			switch (key) {
-			case PS2_F1:
-				reset();
-				break;
-			case PS2_F2:
-				filename = io.files.advance();
-				screen.status(filename? filename: "No file");
-				break;
-			case PS2_F3:
-				filename = io.files.rewind();
-				screen.status(filename? filename: "No file");
-				break;
-			case PS2_F4:
-				if (io.load_prg())
-					snprintf(buf, sizeof(buf), "Loaded %s", filename);
-				else
-					snprintf(buf, sizeof(buf), "Failed to load %s", filename);
-				screen.status(buf);
-				break;
-			case PS2_F6:
-				screen.status(io.files.checkpoint());
-				break;
-			case PS2_F7:
-				if (filename)
-					io.files.restore(filename);
-				break;
-#if defined(CPU_DEBUG)
-			case PS2_F10:
-				cpu_debug = !cpu_debug;
-				break;
-#endif
-			default:
-				io.keyboard.up(key);
-				break;
-			}
-		}
-	} else if (!cpu.halted()) {
-#if defined(CPU_DEBUG)
-		if (cpu_debug) {
-			char buf[256];
-			Serial.println(cpu.status(buf, sizeof(buf)));
-			cpu.run(1);
-		} else
-			cpu.run(CPU_INSTRUCTIONS);
-#else
-		cpu.run(CPU_INSTRUCTIONS);
-#endif
-		if (irq) {
-			irq.clear();
-			cpu.raise(0);
-		}
+	kbd.poll(io.keyboard);
+
+	if (hardware_run() && irq) {
+		irq.clear();
+		cpu.raise(0);
 	}
 }
-

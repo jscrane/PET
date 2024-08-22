@@ -24,9 +24,6 @@
 
 #define RAM_PAGES	(RAM_SIZE / ram<>::page_size)
 
-// number of CPU instructions to run per loop
-#define CPU_INSTRUCTIONS  750
-
 // where programs and images are stored
 #if defined(USE_SD)
 #define PROGRAMS        "/pet/"
@@ -44,8 +41,5 @@
 #if !defined(CHARSET_ROM)
 #define CHARSET_ROM	"roms/characters2.h"
 #endif
-
-// debugging
-//#define DEBUGGING
 
 #endif
