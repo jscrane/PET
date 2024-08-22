@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <memory.h>
-#include <keyboard.h>
+#include <ps2_raw_kbd.h>
 #include <serialio.h>
 #include <filer.h>
 #include <timed.h>

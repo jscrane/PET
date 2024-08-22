@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <hardware.h>
-#include <keyboard.h>
+#include <ps2_raw_kbd.h>
 #include "kbd.h"
 
 //#define DEBUGGING
@@ -117,7 +117,7 @@ void kbd::up(uint8_t scan) {
 		}
 	} else if (scan == 0x59)	// R-Shift
 		_shift = false;
-	else if (isctrl(scan))
+	else if (is_ps2_ctrl(scan))
 		_ctrl = false;
 	else if (scan < 0x80)
 		_reset(_map(scan));
@@ -165,7 +165,7 @@ void kbd::down(uint8_t scan) {
 		// reset any depressed keys so they don't get stuck
 		reset();
 		_shift = true;
-	} else if (isctrl(scan)) {
+	} else if (is_ps2_ctrl(scan)) {
 		reset();
 		_ctrl = true;
 	} else if (scan < 0x80)
