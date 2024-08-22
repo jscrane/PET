@@ -40,11 +40,11 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
-ps2_kbd kbd;
 Line irq;
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files, irq);
+ps2_raw_kbd kbd(io.keyboard);
 screen screen(io.CA2);
 r6502 cpu(memory);
 
@@ -127,7 +127,7 @@ void setup() {
 
 void loop() {
 
-	kbd.poll(io.keyboard);
+	kbd.poll();
 
 	if (hardware_run() && irq) {
 		irq.clear();
