@@ -46,6 +46,7 @@ flash_filer files(PROGRAMS);
 petio io(files, irq);
 ps2_raw_kbd kbd(io.keyboard);
 screen screen(io.CA2);
+Memory memory;
 r6502 cpu(memory);
 
 const char *filename;

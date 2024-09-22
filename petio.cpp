@@ -156,6 +156,8 @@ void petio::sound_octave(uint8_t o) {
 
 bool petio::load_prg()
 {
+	extern Memory memory;
+
 	if (!files.more())
 		return false;
 
