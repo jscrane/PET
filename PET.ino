@@ -4,7 +4,6 @@
 #include <r65emu.h>
 #include <r6502.h>
 #include <pia.h>
-#include <line.h>
 #include <via.h>
 
 #include "config.h"
@@ -40,12 +39,11 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
-Line irq;
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
-petio io(files, irq);
+petio io(files);
 ps2_raw_kbd kbd(io.keyboard);
-screen screen(io.CA2);
+screen screen;
 Memory memory;
 r6502 cpu(memory);
 
@@ -116,6 +114,9 @@ void setup() {
 	memory.put(edit, 0xe000);
 	memory.put(kernal, 0xf000);
 
+	io.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
+	io.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
+
 	kbd.register_fnkey_handler(function_keys);
 
 	bool sd = reset();
@@ -130,8 +131,5 @@ void loop() {
 
 	kbd.poll();
 
-	if (hardware_run() && irq) {
-		irq.clear();
-		cpu.raise(0);
-	}
+	hardware_run();
 }

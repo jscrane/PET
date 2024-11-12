@@ -9,14 +9,16 @@ public:
 	virtual void checkpoint(Stream &s);
 	virtual void restore(Stream &s);
 
-	screen(Line &upr): Memory::Device(sizeof(_mem)), _resolution(0), _upr(upr) {}
+	screen(): Memory::Device(sizeof(_mem)), _resolution(0), _upr(false) {}
 	void begin();
+
+	void set_upper(bool u) { _upr = u; }
 
 private:
 	void _set(Memory::address a, uint8_t c);
 
 	uint8_t _mem[SCREEN_RAM_SIZE];
 	int _resolution;
-	Line &_upr;
+	bool _upr;
 };
 #endif

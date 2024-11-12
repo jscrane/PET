@@ -7,9 +7,7 @@ class Line;
 // two PIAs and the VIA
 class petio: public Memory::Device, public PIA, public VIA {
 public:
-	petio(filer &files, Line &irq): Memory::Device(256), _ticks(0), _octave(0), _freq(0), files(files) {
-		VIA::register_irq(irq);
-	}
+	petio(filer &files): Memory::Device(256), _ticks(0), _octave(0), _freq(0), files(files) {}
 
 	void reset();
 	bool start();

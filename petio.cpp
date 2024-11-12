@@ -6,7 +6,6 @@
 #include <timed.h>
 #include <hardware.h>
 #include <pia.h>
-#include <line.h>
 #include <via.h>
 
 #include "kbd.h"
@@ -50,7 +49,7 @@ void IRAM_ATTR petio::on_tick() {
 	io->tick();
 }
 
-void IRAM_ATTR petio::tick() {
+void petio::tick() {
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
 		VIA::write_vportb_in_bit(VIDEO_RETRACE, true);
