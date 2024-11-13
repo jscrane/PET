@@ -1,5 +1,4 @@
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#pragma once
 
 // Screen
 #define BG_COLOUR	BLACK
@@ -40,6 +39,4 @@
 // character set
 #if !defined(CHARSET_ROM)
 #define CHARSET_ROM	"roms/characters2.h"
-#endif
-
 #endif

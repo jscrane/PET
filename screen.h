@@ -1,5 +1,4 @@
-#ifndef _SCREEN_H
-#define _SCREEN_H
+#pragma once
 
 class screen: public Display, public Memory::Device {
 public:
@@ -21,4 +20,3 @@ private:
 	int _resolution;
 	bool _upr;
 };
-#endif

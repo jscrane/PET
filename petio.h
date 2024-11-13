@@ -1,13 +1,12 @@
-#ifndef __PETIO_H
-#define __PETIO_H
-
-class Line;
+#pragma once
 
 // this occupies all of the addresses (and more) dedicated to the 
 // two PIAs and the VIA
-class petio: public Memory::Device, public PIA, public VIA {
+class petio: public Memory::Device, public PIA {
 public:
-	petio(filer &files): Memory::Device(256), _ticks(0), _octave(0), _freq(0), files(files) {}
+	petio(filer &files): Memory::Device(256), _ticks(0),  files(files) {}
+
+	VIA via;
 
 	void reset();
 	bool start();
@@ -29,23 +28,8 @@ protected:
 	virtual uint8_t read_porta();
 	virtual void write_porta(uint8_t);
 
-	// VIA
-	virtual void write_sr(uint8_t);
-	virtual void write_acr(uint8_t);
-	virtual void write_t2lo(uint8_t);
-
 private:
 	void tick();
 
 	uint8_t _ticks;
-
-	void sound_on();
-	void sound_off();
-	void sound_freq(uint8_t);
-	void sound_octave(uint8_t);
-
-	uint8_t _octave;
-	uint32_t _freq;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef __KBD_H
-#define __KBD_H
+#pragma once
 
 class kbd: public matrix_keyboard {
 public:
@@ -21,5 +20,3 @@ private:
 	uint8_t _row;
 	bool _ctrl, _shift, _ext;
 };
-
-#endif
