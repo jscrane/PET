@@ -43,7 +43,8 @@ prom edit(edit2, 2048);
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files);
-ps2_raw_kbd kbd(io.keyboard);
+kbd keyboard;
+ps2_raw_kbd ps2(keyboard);
 screen screen;
 Memory memory;
 r6502 cpu(memory);
@@ -54,10 +55,10 @@ const char *filename;
 bool reset() {
 
 	bool sd = hardware_reset();
+	sound.reset();
 	io.reset();
-	kbd.reset();
+	ps2.reset();
 	screen.begin();
-	sound.off();
 	return sd;
 }
 
@@ -117,19 +118,20 @@ void setup() {
 	memory.put(edit, 0xe000);
 	memory.put(kernal, 0xf000);
 
+	io.pia1.register_porta_write_handler([](uint8_t b) { keyboard.write(b & 0x0f); });
+	io.pia1.register_porta_read_handler([]() { return keyboard.row() | 0x80; });
+	io.pia1.register_portb_read_handler([]() { return keyboard.read(); });
+
 	io.via.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
 
 	io.via.register_sr_write_handler([](uint8_t r) { sound.octave(r); });
 	io.via.register_t2lo_write_handler([](uint8_t r) { sound.frequency(r); });
 	io.via.register_acr_write_handler([](uint8_t r) {
-		if ((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE)
-			sound.on();
-		else
-			sound.off();
-		});
+		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
+	});
 
-	kbd.register_fnkey_handler(function_keys);
+	ps2.register_fnkey_handler(function_keys);
 
 	bool sd = reset();
 
@@ -141,7 +143,7 @@ void setup() {
 
 void loop() {
 
-	kbd.poll();
+	ps2.poll();
 
 	hardware_run();
 }
