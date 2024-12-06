@@ -7,6 +7,7 @@
 #include <via.h>
 
 #include "petio.h"
+#include "sound.h"
 
 // see http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/PET-Interfaces.txt
 // and http://www.6502.org/users/andre/petindex/progmod.html
@@ -20,13 +21,20 @@
 #define VIDEO_RETRACE	0x20
 
 // 1ms internal clock tick
-#define TICK_FREQ	1
+#if defined(SIMPLE_TIMER_MICROS)
+#define TICK_PERIOD	1000
+#else
+#define TICK_PERIOD	1
+#endif
 
 // 50Hz system interrupt frequency
 #define SYS_TICKS	20
 
+sound sound;
+
 void petio::reset() {
 
+	sound.reset();
 	pia1.reset();
 	pia2.reset();
 	via.reset();
@@ -34,7 +42,7 @@ void petio::reset() {
 
 bool petio::start() {
 
-	hardware_interval_timer(TICK_FREQ, [this]() { this->tick(); });
+	hardware_interval_timer(TICK_PERIOD, [this]() { this->tick(); });
 
 	return files.start();
 }
@@ -75,6 +83,20 @@ void petio::operator=(uint8_t r) {
 	}
 
 	via.write(_acc - VIA_OFFSET, r);
+
+#if !defined(BIT_BANG_SOUND)
+	switch (_acc - VIA_OFFSET) {
+	case 0x0a:
+		sound.octave(r);
+		break;
+	case 0x08:
+		sound.frequency(r);
+		break;
+	case 0x0b:
+		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
+		break;
+	}
+#endif
 }
 
 bool petio::load_prg()

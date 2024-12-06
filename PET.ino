@@ -10,7 +10,6 @@
 #include "screen.h"
 #include "kbd.h"
 #include "petio.h"
-#include "sound.h"
 
 #if ROM_SET == series4
 #include "roms/basic4_b000.h"
@@ -48,14 +47,12 @@ ps2_raw_kbd ps2(keyboard);
 screen screen;
 Memory memory;
 r6502 cpu(memory);
-sound sound;
 
 const char *filename;
 
 bool reset() {
 
 	bool sd = hardware_reset();
-	sound.reset();
 	io.reset();
 	ps2.reset();
 	screen.begin();
@@ -124,12 +121,9 @@ void setup() {
 
 	io.via.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
-
-	io.via.register_sr_write_handler([](uint8_t r) { sound.octave(r); });
-	io.via.register_t2lo_write_handler([](uint8_t r) { sound.frequency(r); });
-	io.via.register_acr_write_handler([](uint8_t r) {
-		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
-	});
+#if defined(BIT_BANG_SOUND)
+	io.via.register_cb2_handler([](bool cb2) { digitalWrite(PWM_SOUND, cb2); });
+#endif
 
 	ps2.register_fnkey_handler(function_keys);
 
