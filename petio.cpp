@@ -84,7 +84,6 @@ void petio::operator=(uint8_t r) {
 
 	via.write(_acc - VIA_OFFSET, r);
 
-#if !defined(BIT_BANG_SOUND)
 	switch (_acc - VIA_OFFSET) {
 	case 0x0a:
 		sound.octave(r);
@@ -96,7 +95,6 @@ void petio::operator=(uint8_t r) {
 		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
 		break;
 	}
-#endif
 }
 
 bool petio::load_prg()
