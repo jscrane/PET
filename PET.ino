@@ -121,9 +121,6 @@ void setup() {
 
 	io.via.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
-#if defined(BIT_BANG_SOUND)
-	io.via.register_cb2_handler([](bool cb2) { digitalWrite(PWM_SOUND, cb2); });
-#endif
 
 	ps2.register_fnkey_handler(function_keys);
 
