@@ -11,7 +11,7 @@ public:
 	VIA via;
 
 	void reset();
-	bool start();
+	bool start() { return files.start(); }
 
 	void operator= (uint8_t b);
 	operator uint8_t();
@@ -21,8 +21,8 @@ public:
 	// loads the file currently selected by tape
 	bool load_prg();
 
-private:
 	void tick();
 
+private:
 	uint8_t _ticks;
 };

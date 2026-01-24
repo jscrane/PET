@@ -39,6 +39,13 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
+// 1ms internal clock tick
+#if defined(SIMPLE_TIMER_MICROS)
+#define TICK_PERIOD	1000
+#else
+#define TICK_PERIOD	1
+#endif
+
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files);
@@ -47,24 +54,28 @@ ps2_raw_kbd ps2(keyboard);
 screen screen;
 Memory memory;
 r6502 cpu(memory);
+Machine machine(cpu);
 
-const char *filename;
+static void reset(bool sd) {
 
-bool reset() {
-
-	bool sd = hardware_reset();
 	io.reset();
 	ps2.reset();
 	screen.begin();
-	return sd;
+
+	if (!sd)
+		screen.status("No SD Card");
+	else if (!io.start())
+		screen.status("Failed to open " PROGRAMS);
 }
 
 void function_keys(uint8_t key) {
 
+	static const char *filename;
+
 	char buf[32];
 	switch (key) {
 	case 1:
-		reset();
+		machine.reset();
 		break;
 	case 2:
 		filename = io.files.advance();
@@ -89,14 +100,14 @@ void function_keys(uint8_t key) {
 			io.files.restore(filename);
 		break;
 	case 10:
-		hardware_debug_cpu();
+		machine.debug_cpu();
 		break;
 	}
 }
 
 void setup() {
 
-	hardware_init(cpu);
+	machine.init();
 
 	for (int i = 0; i < RAM_PAGES; i++)
 		memory.put(pages[i], i * ram<>::page_size);
@@ -122,19 +133,17 @@ void setup() {
 	io.via.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
 
+	machine.interval_timer(TICK_PERIOD, []() { io.tick(); });
+
 	ps2.register_fnkey_handler(function_keys);
 
-	bool sd = reset();
-
-	if (!sd)
-		screen.status("No SD Card");
-	else if (!io.start())
-		screen.status("Failed to open " PROGRAMS);
+	machine.register_reset_handler(reset);
+	machine.reset();
 }
 
 void loop() {
 
 	ps2.poll();
 
-	hardware_run();
+	machine.run();
 }

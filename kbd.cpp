@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <stdint.h>
-#include <hardware.h>
 #include <ps2_raw_kbd.h>
 #include "kbd.h"
+#include "debugging.h"
 
 //#define DEBUGGING
 
@@ -84,8 +84,7 @@ void kbd::_reset(uint8_t k) {
 
 void kbd::up(uint8_t scan) {
 
-	DBG(printf("key up: %02x", scan));
-	DBG(println());
+	DBG_EMU(printf("key up: %02x\r\n", scan));
 
 	if (_ext) {
 		_ext = false;
@@ -129,8 +128,7 @@ void kbd::_set(uint8_t k) {
 
 void kbd::down(uint8_t scan) {
 
-	DBG(printf("key down: %02x", scan));
-	DBG(println());
+	DBG_EMU(printf("key down: %02x\r\n", scan));
 
 	if (scan == 0xe0)
 		_ext = true;

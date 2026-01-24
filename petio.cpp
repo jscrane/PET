@@ -20,13 +20,6 @@
 // via port-b
 #define VIDEO_RETRACE	0x20
 
-// 1ms internal clock tick
-#if defined(SIMPLE_TIMER_MICROS)
-#define TICK_PERIOD	1000
-#else
-#define TICK_PERIOD	1
-#endif
-
 // 50Hz system interrupt frequency
 #define SYS_TICKS	20
 
@@ -38,13 +31,6 @@ void petio::reset() {
 	pia1.reset();
 	pia2.reset();
 	via.reset();
-}
-
-bool petio::start() {
-
-	hardware_interval_timer(TICK_PERIOD, [this]() { this->tick(); });
-
-	return files.start();
 }
 
 void petio::tick() {
