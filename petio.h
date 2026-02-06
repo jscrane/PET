@@ -4,7 +4,7 @@
 // two PIAs and the VIA
 class petio: public Memory::Device {
 public:
-	petio(filer &files): Memory::Device(256), _ticks(0),  files(files) {}
+	petio(filer &files): Memory::Device(256), _ticks(0),  _timer(-1), files(files) {}
 
 	PIA pia1;
 	PIA pia2;
@@ -21,8 +21,8 @@ public:
 	// loads the file currently selected by tape
 	bool load_prg();
 
-	void tick();
-
 private:
 	uint8_t _ticks;
+	int _timer;
+	void tick();
 };

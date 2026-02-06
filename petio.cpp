@@ -1,10 +1,12 @@
-#include <Arduino.h>
+#include <stdint.h>
+
+#include <machine.h>
 #include <memory.h>
 #include <serialio.h>
 #include <filer.h>
-#include <hardware.h>
 #include <pia.h>
 #include <via.h>
+#include <debugging.h>
 
 #include "petio.h"
 #include "sound.h"
@@ -23,6 +25,9 @@
 // 50Hz system interrupt frequency
 #define SYS_TICKS	20
 
+// 1ms internal clock tick
+#define TICK_PERIOD	1000
+
 sound sound;
 
 void petio::reset() {
@@ -31,18 +36,27 @@ void petio::reset() {
 	pia1.reset();
 	pia2.reset();
 	via.reset();
+
+	if (_timer < 0)
+		_timer = _machine->oneshot_timer(TICK_PERIOD, [this]() { tick(); });
+		//_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
 void petio::tick() {
 
+	DBG_EMU("tick: %d", _ticks);
+
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
+		pia1.write_cb1(true);
 		via.write_portb_in_bit(VIDEO_RETRACE, true);
-		via.set_interrupt();
-	} else
+	} else {
+		pia1.write_cb1(false);
 		via.write_portb_in_bit(VIDEO_RETRACE, false);
+	}
 
-	via.tick();
+	// ???
+	_timer = _machine->oneshot_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
 petio::operator uint8_t() {

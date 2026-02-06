@@ -1,6 +1,7 @@
 #include <Arduino.h>
-#include <Stream.h>
 #include <stdint.h>
+
+#include <machine.h>
 #include <memory.h>
 #include <display.h>
 #include <hardware.h>
@@ -91,19 +92,19 @@ void screen::_set(Memory::address a, uint8_t c)
 	_mem[a] = c;
 }
 
-void screen::checkpoint(Stream &s)
+void screen::checkpoint(Checkpoint &s)
 {
 	s.write(_resolution); 
 	s.write(_mem, sizeof(_mem));
 }
 
-void screen::restore(Stream &s)
+void screen::restore(Checkpoint &s)
 {
 	_resolution = s.read();
 
 	for (Memory::address p = 0; p < sizeof(_mem); p += Memory::page_size) {
 		uint8_t buf[Memory::page_size];
-		s.readBytes(buf, sizeof(buf));
+		s.read(buf, sizeof(buf));
 		for (unsigned i = 0; i < Memory::page_size; i++)
 			_set(p + i, buf[i]);
 	}

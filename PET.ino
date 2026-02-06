@@ -39,13 +39,6 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
-// 1ms internal clock tick
-#if defined(SIMPLE_TIMER_MICROS)
-#define TICK_PERIOD	1000
-#else
-#define TICK_PERIOD	1
-#endif
-
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
 petio io(files);
@@ -54,7 +47,7 @@ ps2_raw_kbd ps2(keyboard);
 screen screen;
 Memory memory;
 r6502 cpu(memory);
-Machine machine(cpu);
+Arduino machine(cpu);
 
 static void reset(bool sd) {
 
@@ -105,9 +98,14 @@ void function_keys(uint8_t key) {
 	}
 }
 
+static void interrupt(bool irq) {
+  if (irq)
+    cpu.raise(0);
+}
+
 void setup() {
 
-	machine.init();
+	machine.begin();
 
 	for (int i = 0; i < RAM_PAGES; i++)
 		memory.put(pages[i], i * ram<>::page_size);
@@ -129,11 +127,11 @@ void setup() {
 	io.pia1.register_porta_write_handler([](uint8_t b) { keyboard.write(b & 0x0f); });
 	io.pia1.register_porta_read_handler([]() { return keyboard.row() | 0x80; });
 	io.pia1.register_portb_read_handler([]() { return keyboard.read(); });
+	io.pia1.register_irqa_handler(interrupt);
+	io.pia1.register_irqb_handler(interrupt);
 
-	io.via.register_irq_handler([](bool irq) { if (irq) cpu.raise(0); });
+	io.via.register_irq_handler(interrupt);
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
-
-	machine.interval_timer(TICK_PERIOD, []() { io.tick(); });
 
 	ps2.register_fnkey_handler(function_keys);
 

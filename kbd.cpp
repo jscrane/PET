@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <ps2_raw_kbd.h>
+#include <machine.h>
+#include <hardware.h>
+#include <debugging.h>
 #include "kbd.h"
-#include "debugging.h"
-
-//#define DEBUGGING
 
 // http://www.6502.org/users/andre/petindex/keyboards.html
 
@@ -84,7 +84,7 @@ void kbd::_reset(uint8_t k) {
 
 void kbd::up(uint8_t scan) {
 
-	DBG_EMU(printf("key up: %02x\r\n", scan));
+	DBG_EMU("key up: %02x", scan);
 
 	if (_ext) {
 		_ext = false;
@@ -128,7 +128,7 @@ void kbd::_set(uint8_t k) {
 
 void kbd::down(uint8_t scan) {
 
-	DBG_EMU(printf("key down: %02x\r\n", scan));
+	DBG_EMU("key down: %02x", scan);
 
 	if (scan == 0xe0)
 		_ext = true;

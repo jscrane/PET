@@ -5,8 +5,8 @@ public:
 	virtual void operator= (uint8_t c) { _set(_acc, c); }
 	virtual operator uint8_t () { return _mem[_acc]; }
 
-	virtual void checkpoint(Stream &s);
-	virtual void restore(Stream &s);
+	virtual void checkpoint(Checkpoint &s);
+	virtual void restore(Checkpoint &s);
 
 	screen(): Memory::Device(sizeof(_mem)), _resolution(0), _upr(false) {}
 	void begin();
