@@ -1,25 +1,15 @@
 t ?= esp32
 
-SERIAL_LOGFILE := serialout.txt
 TERMINAL_SPEED := 115200
-TERMINAL_EXTRA_FLAGS := -C $(SERIAL_LOGFILE)
+TERMINAL_EXTRA_FLAGS := -C serialout.txt
 LIBRARIES = SimpleTimer PS2KeyRaw
-BUILD_USER := $(SERIAL_LOGFILE)
 CPPFLAGS = -DSIMPLE_TIMER_MICROS -DDEBUGGING=0x00 -DTERMINAL_SPEED=$(TERMINAL_SPEED)
-
-ifeq ($t, tivac)
-BOARD := EK-LM4F120XL
-
-CPPFLAGS += -DHARDWARE_H=\"hw/stellarpad-example.h\"
-LIBRARIES += UTFT SD SpiRAM
-endif
 
 ifeq ($t, esp8266)
 BOARD := d1_mini
-BAUD := 921600
 FS_DIR := data
-EESZ := 4M1M
-F_CPU := 80
+baud := 921600
+eesz := 4M1M
 
 CPPFLAGS += -DUSER_SETUP_LOADED -DILI9341_DRIVER -DTFT_CS=PIN_D8 -DTFT_DC=PIN_D1 \
 	-DTFT_RST=-1 -DSPI_FREQUENCY=40000000 -DLOAD_GLCD \
@@ -30,20 +20,19 @@ endif
 ifeq ($t, rp2040)
 BOARD := adafruit_feather_dvi
 FLASH := 8388608_2097152
-CPPFLAGS += -DHARDWARE_H=\"hw/adafruit_feather_dvi.h\"
 CPPFLAGS += -DDVI_BIT_DEPTH=1 -DDVI_RESOLUTION=DVI_RES_640x240p60
 LIBRARIES += LittleFS PicoDVI Adafruit_GFX Adafruit_BusIO Wire
 endif
 
 ifeq ($t, esp32)
-UPLOADSPEED := 921600
+UploadSpeed := 921600
 FS_DIR := data
 LIBRARIES += FS SPIFFS
 
 ifeq ($b, lilygo)
 BOARD := ttgo-t7-v14-mini32
 SERIAL_PORT := /dev/ttyACM0
-CPPFLAGS += -DHARDWARE_H=\"hw/ttgo-t7-v14-mini32.h\" -DVGA_RESOLUTION=VGAMode::MODE400x300 -DROM_SET=series4
+CPPFLAGS += -DVGA_RESOLUTION=VGAMode::MODE400x300 -DROM_SET=series4
 LIBRARIES += ESP32Lib
 
 else

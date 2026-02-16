@@ -61,7 +61,7 @@ static void reset(bool sd) {
 		screen.status("Failed to open " PROGRAMS);
 }
 
-void function_keys(uint8_t key) {
+static void function_keys(uint8_t key) {
 
 	static const char *filename;
 
@@ -98,10 +98,7 @@ void function_keys(uint8_t key) {
 	}
 }
 
-static void interrupt(bool irq) {
-  if (irq)
-    cpu.raise(0);
-}
+static void interrupt(bool irq) { if (irq) cpu.raise(0); }
 
 void setup() {
 
@@ -134,14 +131,13 @@ void setup() {
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
 
 	ps2.register_fnkey_handler(function_keys);
+	machine.register_pollable(ps2);
 
 	machine.register_reset_handler(reset);
 	machine.reset();
 }
 
 void loop() {
-
-	ps2.poll();
 
 	machine.run();
 }

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <stdint.h>
-#include <ps2_raw_kbd.h>
 #include <machine.h>
+#include <ps2_raw_kbd.h>
 #include <hardware.h>
 #include <debugging.h>
 #include "kbd.h"
