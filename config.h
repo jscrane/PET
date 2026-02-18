@@ -7,7 +7,7 @@
 #define SCREEN_LINES	25
 #define SCREEN_RAM_SIZE	0x0400
 
-#if defined(USE_UTFT) || defined(USE_VGA) || defined(USE_DVI)
+#if defined(USE_VGA) || defined(USE_DVI)
 #define ORIENT	landscape
 #elif defined(USE_ESPI)
 #define ORIENT	reverse_landscape
