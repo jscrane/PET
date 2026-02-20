@@ -2,7 +2,7 @@ t ?= esp32
 
 TERMINAL_SPEED := 115200
 TERMINAL_EXTRA_FLAGS := -C serialout.txt
-LIBRARIES = SimpleTimer PS2KeyRaw
+LIBRARIES = SimpleTimer PS2KeyRaw Adafruit_GFX Adafruit_BusIO Wire
 CPPFLAGS = -DSIMPLE_TIMER_MICROS -DDEBUGGING=0x00 -DTERMINAL_SPEED=$(TERMINAL_SPEED)
 
 ifeq ($t, esp8266)
@@ -19,9 +19,9 @@ endif
 
 ifeq ($t, rp2040)
 BOARD := adafruit_feather_dvi
-FLASH := 8388608_2097152
+flash := 8388608_2097152
 CPPFLAGS += -DDVI_BIT_DEPTH=1 -DDVI_RESOLUTION=DVI_RES_640x240p60
-LIBRARIES += LittleFS PicoDVI Adafruit_GFX Adafruit_BusIO Wire
+LIBRARIES += LittleFS PicoDVI
 endif
 
 ifeq ($t, esp32)
