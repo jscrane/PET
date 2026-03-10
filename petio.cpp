@@ -30,6 +30,12 @@
 
 sound sound;
 
+petio::petio(filer &files): _ticks(0),  _timer(-1), files(files) {
+	put(pia1, PIA1_OFFSET);
+	put(pia2, PIA2_OFFSET);
+	put(via, VIA_OFFSET);
+}
+
 void petio::reset() {
 
 	sound.reset();
@@ -59,30 +65,9 @@ void petio::tick() {
 	_timer = _machine->oneshot_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
-petio::operator uint8_t() {
-
-	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET)
-		return pia1.read((_acc - PIA1_OFFSET) & 0x0f);
-
-	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET)
-		return pia2.read((_acc - PIA2_OFFSET) & 0x0f);
-
-	return via.read(_acc - VIA_OFFSET);
-}
-
 void petio::operator=(uint8_t r) {
 
-	if (PIA1_OFFSET <= _acc && _acc < PIA2_OFFSET) {
-		pia1.write((_acc - PIA1_OFFSET) & 0x0f, r);
-		return;
-	}
-
-	if (PIA2_OFFSET <= _acc && _acc < VIA_OFFSET) {
-		pia2.write((_acc - PIA2_OFFSET) & 0x0f, r);
-		return;
-	}
-
-	via.write(_acc - VIA_OFFSET, r);
+	Devices::operator=(r);
 
 	switch (_acc - VIA_OFFSET) {
 	case 0x0a:

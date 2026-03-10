@@ -16,7 +16,7 @@
 // SPI-RAM
 #if defined(USE_SPIRAM)
 #define SPIRAM_BASE     RAM_SIZE
-#define SPIRAM_EXTENT	((0x8000 - RAM_SIZE) / Memory::page_size)
+#define SPIRAM_EXTENT	(0x8000 - RAM_SIZE)
 #endif
 
 #define RAM_PAGES	(RAM_SIZE / ram<>::page_size)
