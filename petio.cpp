@@ -44,13 +44,10 @@ void petio::reset() {
 	via.reset();
 
 	if (_timer < 0)
-		_timer = _machine->oneshot_timer(TICK_PERIOD, [this]() { tick(); });
-		//_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
+		_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
 void petio::tick() {
-
-	DBG_EMU("tick: %d", _ticks);
 
 	if (_ticks++ == SYS_TICKS) {
 		_ticks = 0;
@@ -60,15 +57,11 @@ void petio::tick() {
 		pia1.write_cb1(false);
 		via.write_portb_in_bit(VIDEO_RETRACE, false);
 	}
-
-	// ???
-	_timer = _machine->oneshot_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
 void petio::operator=(uint8_t r) {
 
 	Devices::operator=(r);
-
 	switch (_acc - VIA_OFFSET) {
 	case 0x0a:
 		sound.octave(r);
@@ -82,8 +75,8 @@ void petio::operator=(uint8_t r) {
 	}
 }
 
-bool petio::load_prg()
-{
+bool petio::load_prg() {
+
 	extern Memory memory;
 
 	if (!files.more())
