@@ -19,6 +19,7 @@
 #define SPIRAM_EXTENT	(0x8000 - RAM_SIZE)
 #endif
 
+#define RAM_BASE        0x0000u
 #define RAM_PAGES	(RAM_SIZE / ram<>::page_size)
 
 // where programs and images are stored

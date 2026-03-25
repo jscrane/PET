@@ -104,10 +104,12 @@ void setup() {
 
 	machine.begin();
 
+	DBG_INI("RAM:   %dkB at 0x%04x", RAM_PAGES, RAM_BASE);
 	for (int i = 0; i < RAM_PAGES; i++)
-		memory.put(pages[i], i * ram<>::page_size);
+		memory.put(pages[i], RAM_BASE + i * ram<>::page_size);
 
 #if defined(USE_SPIRAM)
+	DBG_INI("SpiRAM: %dkB at 0x%04x", SPIRAM_EXTENT / 1024, SPIRAM_BASE);
 	memory.put(sram, SPIRAM_BASE, SPIRAM_EXTENT);
 #endif
 	memory.put(screen, 0x8000);
