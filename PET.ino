@@ -61,6 +61,8 @@ static void reset(bool sd) {
 		screen.status("Failed to open " PROGRAMS);
 }
 
+static bool debug_cpu;
+
 static void function_keys(uint8_t key) {
 
 	static const char *filename;
@@ -93,7 +95,7 @@ static void function_keys(uint8_t key) {
 			io.files.restore(filename);
 		break;
 	case 10:
-		machine.debug_cpu();
+		debug_cpu = !debug_cpu;
 		break;
 	}
 }
@@ -135,6 +137,7 @@ void setup() {
 	ps2.register_fnkey_handler(function_keys);
 	machine.register_pollable(ps2);
 
+	machine.set_cpu_debugging([]() { return debug_cpu; });
 	machine.register_reset_handler(reset);
 	machine.reset();
 }
