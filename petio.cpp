@@ -22,15 +22,12 @@
 // via port-b
 #define VIDEO_RETRACE	0x20
 
-// 50Hz system interrupt frequency
-#define SYS_TICKS	20
-
 // 1ms internal clock tick
 #define TICK_PERIOD	1000
 
 sound sound;
 
-petio::petio(filer &files): _ticks(0),  _timer(-1), files(files) {
+petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
 	put(pia1, PIA1_OFFSET);
 	put(pia2, PIA2_OFFSET);
 	put(via, VIA_OFFSET);
@@ -47,27 +44,29 @@ void petio::reset() {
 		_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
+// 60Hz is approx 16.67ms. Using 17 ticks @ 1ms = 58.8Hz.
+// 0-13 = Active Display (14ms)
+// 14-16 = Retrace (3ms)
 void petio::tick() {
 
-	if (_ticks++ == SYS_TICKS) {
+	bool active_display = (_ticks < 14);
+	pia1.write_cb1(active_display);
+	via.write_portb_in_bit(VIDEO_RETRACE, !active_display);
+
+	if (++_ticks == 17)
 		_ticks = 0;
-		pia1.write_cb1(true);
-		via.write_portb_in_bit(VIDEO_RETRACE, true);
-	} else {
-		pia1.write_cb1(false);
-		via.write_portb_in_bit(VIDEO_RETRACE, false);
-	}
 }
 
 void petio::operator=(uint8_t r) {
 
 	Devices::operator=(r);
+
 	switch (_acc - VIA_OFFSET) {
-	case 0x0a:
-		sound.octave(r);
-		break;
 	case 0x08:
 		sound.frequency(r);
+		break;
+	case 0x0a:
+		sound.octave(r);
 		break;
 	case 0x0b:
 		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);

@@ -32,5 +32,5 @@ void sound::frequency(uint8_t p) {
 
 void sound::octave(uint8_t o) {
 	_octave = o;
-	on();
+	on_off(o == 15 || o == 51 || o == 85);
 }
