@@ -60,12 +60,13 @@ void petio::tick() {
 void petio::operator=(uint8_t r) {
 
 	Devices::operator=(r);
+
 	switch (_acc - VIA_OFFSET) {
-	case 0x0a:
-		sound.octave(r);
-		break;
 	case 0x08:
 		sound.frequency(r);
+		break;
+	case 0x0a:
+		sound.octave(r);
 		break;
 	case 0x0b:
 		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
