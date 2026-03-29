@@ -27,7 +27,7 @@
 
 sound sound;
 
-petio::petio(filer &files): _ticks(0),  _timer(-1), files(files) {
+petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
 	put(pia1, PIA1_OFFSET);
 	put(pia2, PIA2_OFFSET);
 	put(via, VIA_OFFSET);
