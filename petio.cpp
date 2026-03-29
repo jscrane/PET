@@ -22,9 +22,6 @@
 // via port-b
 #define VIDEO_RETRACE	0x20
 
-// 50Hz system interrupt frequency
-#define SYS_TICKS	20
-
 // 1ms internal clock tick
 #define TICK_PERIOD	1000
 
@@ -47,16 +44,17 @@ void petio::reset() {
 		_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
+// 60Hz is approx 16.67ms. Using 17 ticks @ 1ms = 58.8Hz.
+// 0-13 = Active Display (14ms)
+// 14-16 = Retrace (3ms)
 void petio::tick() {
 
-	if (_ticks++ == SYS_TICKS) {
+	bool active_display = (_ticks < 14);
+	pia1.write_cb1(active_display);
+	via.write_portb_in_bit(VIDEO_RETRACE, !active_display);
+
+	if (++_ticks == 17)
 		_ticks = 0;
-		pia1.write_cb1(true);
-		via.write_portb_in_bit(VIDEO_RETRACE, true);
-	} else {
-		pia1.write_cb1(false);
-		via.write_portb_in_bit(VIDEO_RETRACE, false);
-	}
 }
 
 void petio::operator=(uint8_t r) {

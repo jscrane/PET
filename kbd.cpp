@@ -1,4 +1,4 @@
-#include <Arduino.h>
+#include <pgmspace.h>
 #include <stdint.h>
 #include <machine.h>
 #include <ps2_raw_kbd.h>
