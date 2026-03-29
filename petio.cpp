@@ -40,6 +40,8 @@ void petio::reset() {
 	pia2.reset();
 	via.reset();
 
+	via.register_portb_input_handler([this]() { return _ticks >= 14? VIDEO_RETRACE: 0x00; });
+
 	if (_timer < 0)
 		_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
@@ -51,7 +53,6 @@ void petio::tick() {
 
 	bool active_display = (_ticks < 14);
 	pia1.write_cb1(active_display);
-	via.write_portb_in_bit(VIDEO_RETRACE, !active_display);
 
 	if (++_ticks == 17)
 		_ticks = 0;
