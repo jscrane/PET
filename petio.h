@@ -22,4 +22,5 @@ private:
 	uint8_t _ticks;
 	int _timer;
 	void tick();
+	void restart_timer();
 };
