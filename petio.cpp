@@ -33,6 +33,13 @@ petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
 	put(via, VIA_OFFSET);
 }
 
+void petio::restart_timer() {
+
+	if (_timer >= 0)
+		_machine->cancel_timer(_timer);
+	_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
+}
+
 void petio::reset() {
 
 	sound.reset();
@@ -40,10 +47,8 @@ void petio::reset() {
 	pia2.reset();
 	via.reset();
 
-	via.register_portb_input_handler([this]() { return _ticks >= 14? VIDEO_RETRACE: 0x00; });
-
-	if (_timer < 0)
-		_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
+	via.register_portb_input_handler([this]() { return _ticks >= 14? VIDEO_RETRACE: 0; });
+	restart_timer();
 }
 
 // 60Hz is approx 16.67ms. Using 17 ticks @ 1ms = 58.8Hz.
@@ -51,8 +56,7 @@ void petio::reset() {
 // 14-16 = Retrace (3ms)
 void petio::tick() {
 
-	bool active_display = (_ticks < 14);
-	pia1.write_cb1(active_display);
+	pia1.write_cb1(_ticks < 14);
 
 	if (++_ticks == 17)
 		_ticks = 0;
@@ -87,7 +91,7 @@ bool petio::load_prg() {
 	Memory::address a = lo + (hi << 8);
 	while (files.more())
 		memory[a++] = files.read();
-	
+
 	// based on mem_get/set_basic_text() from vice/petmem.c
 	memory[0xc7] = memory[0x28];
 	memory[0xc8] = memory[0x29];
@@ -103,6 +107,8 @@ bool petio::load_prg() {
 	memory[0x2d] = hi;
 	memory[0x2f] = hi;
 	memory[0xca] = hi;
-	
+
+	// resynchronize the timer
+	restart_timer();
 	return true;
 }

@@ -8,8 +8,8 @@ public:
 	void down(uint8_t);
 	void reset();
 
-	void write(uint8_t r) { _row = r; }
-	uint8_t read() { return _rows[_row] ^ 0xff; }
+	void write(uint8_t r) { _row = r & 0x0f; }
+	uint8_t read() { return _row > 9? 0xff: _rows[_row] ^ 0xff; }
 	uint8_t row() { return _row; }
 private:
 	uint8_t _map(uint8_t);
