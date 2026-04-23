@@ -144,5 +144,5 @@ void setup() {
 
 void loop() {
 
-	machine.run();
+	machine.run(CLK_1MHZ);
 }

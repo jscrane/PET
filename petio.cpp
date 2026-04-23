@@ -33,13 +33,6 @@ petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
 	put(via, VIA_OFFSET);
 }
 
-void petio::restart_timer() {
-
-	if (_timer >= 0)
-		_machine->cancel_timer(_timer);
-	_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
-}
-
 void petio::reset() {
 
 	sound.reset();
@@ -48,7 +41,10 @@ void petio::reset() {
 	via.reset();
 
 	via.register_portb_input_handler([this]() { return _ticks >= 14? VIDEO_RETRACE: 0; });
-	restart_timer();
+
+	if (_timer >= 0)
+		_machine->cancel_timer(_timer);
+	_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
 // 60Hz is approx 16.67ms. Using 17 ticks @ 1ms = 58.8Hz.
@@ -108,7 +104,5 @@ bool petio::load_prg() {
 	memory[0x2f] = hi;
 	memory[0xca] = hi;
 
-	// resynchronize the timer
-	restart_timer();
 	return true;
 }

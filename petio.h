@@ -20,7 +20,6 @@ public:
 
 private:
 	uint8_t _ticks;
-	int _timer;
+	int8_t _timer;
 	void tick();
-	void restart_timer();
 };
