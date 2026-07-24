@@ -16,12 +16,43 @@ static struct resolution {
 	{"40x25", 8, 8},
 };
 
-void screen::begin()
-{
+void screen::begin() {
 	struct resolution &r = resolutions[_resolution];
 
 	Display::begin(BG_COLOUR, FG_COLOUR, ORIENT, CHARS_PER_LINE*r.cw, SCREEN_LINES*r.ch);
-	clear();
+	Display::clear();
+	memset(_mem, ' ', sizeof(_mem));
+}
+
+void screen::set_upper(bool u) {
+	if (u != _upr) {
+		_upr = u;
+		_redraw();
+	}
+}
+
+void screen::_redraw() {
+
+	struct resolution &r = resolutions[_resolution];
+	for (Memory::address a = 0; a < CHARS_PER_LINE * SCREEN_LINES; a++) {
+		uint8_t c = _mem[a];
+
+		unsigned x = r.cw * (a % CHARS_PER_LINE);
+		unsigned y = r.ch * (a / CHARS_PER_LINE);
+
+		uint8_t ch = (c & 0x7f);
+		bool invert = (c & 0x80);
+		if (_upr)
+			ch |= 0x80;
+
+		for (unsigned j = 0; j < r.ch; j++) {
+			uint8_t b = pgm_read_byte(&charset[ch][j]);
+			if (invert)
+				b = ~b;
+			for (unsigned bit = 0; bit < 8; bit++)
+				drawPixel(x + (7 - bit), y + j, (b & (1 << bit)) ? FG_COLOUR : BG_COLOUR);
+		}
+	}
 }
 
 /*
@@ -33,8 +64,7 @@ void screen::begin()
  */
 void screen::_set(Memory::address a, uint8_t c)
 {
-	if (a >= CHARS_PER_LINE * SCREEN_LINES)
-		return;
+	a %= (CHARS_PER_LINE * SCREEN_LINES);
 
 	uint8_t cm = _mem[a];
 	if (c == cm)
@@ -91,20 +121,15 @@ void screen::_set(Memory::address a, uint8_t c)
 	_mem[a] = c;
 }
 
-void screen::checkpoint(Checkpoint &s)
-{
+void screen::checkpoint(Checkpoint &s) {
 	s.write(_resolution); 
+	s.write(_upr);
 	s.write(_mem, sizeof(_mem));
 }
 
-void screen::restore(Checkpoint &s)
-{
-	_resolution = s.read();
-
-	for (Memory::address p = 0; p < sizeof(_mem); p += Memory::page_size) {
-		uint8_t buf[Memory::page_size];
-		s.read(buf, sizeof(buf));
-		for (unsigned i = 0; i < Memory::page_size; i++)
-			_set(p + i, buf[i]);
-	}
+void screen::restore(Checkpoint &s) {
+	s.read(_resolution);
+	s.read(_upr);
+	s.read(_mem, sizeof(_mem));
+	_redraw();
 }
