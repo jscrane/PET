@@ -11,12 +11,13 @@ public:
 	screen(): Memory::Device(sizeof(_mem)), _resolution(0), _upr(false) {}
 	void begin();
 
-	void set_upper(bool u) { _upr = u; }
+	void set_upper(bool);
 
 private:
 	void _set(Memory::address a, uint8_t c);
+	void _redraw(void);
 
 	uint8_t _mem[SCREEN_RAM_SIZE];
-	int _resolution;
+	uint8_t _resolution;
 	bool _upr;
 };
