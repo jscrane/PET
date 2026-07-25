@@ -49,6 +49,8 @@ Memory memory;
 r6502 cpu(memory);
 Arduino machine(cpu);
 
+static bool debug_cpu;
+
 static void reset(bool sd) {
 
 	io.reset();
@@ -59,9 +61,9 @@ static void reset(bool sd) {
 		screen.status("No SD Card");
 	else if (!io.start())
 		screen.status("Failed to open " PROGRAMS);
-}
 
-static bool debug_cpu;
+	debug_cpu = false;
+}
 
 static void function_keys(uint8_t key) {
 
@@ -100,7 +102,9 @@ static void function_keys(uint8_t key) {
 	}
 }
 
-static void interrupt(bool irq) { if (irq) cpu.raise(0); }
+static const uint8_t PIA1_IRQA = 0;
+static const uint8_t PIA1_IRQB = 1;
+static const uint8_t VIA_IRQ = 2;
 
 void setup() {
 
@@ -128,10 +132,10 @@ void setup() {
 	io.pia1.register_porta_write_handler([](uint8_t b) { keyboard.write(b & 0x0f); });
 	io.pia1.register_porta_read_handler([]() { return keyboard.row() | 0x80; });
 	io.pia1.register_portb_read_handler([]() { return keyboard.read(); });
-	io.pia1.register_irqa_handler(interrupt);
-	io.pia1.register_irqb_handler(interrupt);
+	io.pia1.register_irqa_handler([](bool b) { cpu.interrupt(b, PIA1_IRQA); });
+	io.pia1.register_irqb_handler([](bool b) { cpu.interrupt(b, PIA1_IRQB); });
 
-	io.via.register_irq_handler(interrupt);
+	io.via.register_irq_handler([](bool b) { cpu.interrupt(b, VIA_IRQ); });
 	io.via.register_ca2_handler([](bool ca2) { screen.set_upper(ca2); });
 
 	ps2.register_fnkey_handler(function_keys);
