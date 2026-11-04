@@ -5,6 +5,9 @@
 #include <r6502.h>
 #include <pia.h>
 #include <via.h>
+#include <debugging.h>
+#include <ps2_raw_kbd.h>
+#include <flash_filer.h>
 
 #include "config.h"
 #include "screen.h"
@@ -65,38 +68,38 @@ static void reset(bool sd) {
 	debug_cpu = false;
 }
 
-static void function_keys(uint8_t key) {
+static void function_keys(uint16_t key) {
 
 	static const char *filename;
 
 	char buf[32];
 	switch (key) {
-	case 1:
+	case F1:
 		machine.reset();
 		break;
-	case 2:
+	case F2:
 		filename = io.files.advance();
 		screen.status(filename? filename: "No file");
 		break;
-	case 3:
+	case F3:
 		filename = io.files.rewind();
 		screen.status(filename? filename: "No file");
 		break;
-	case 4:
+	case F4:
 		if (io.load_prg())
 			snprintf(buf, sizeof(buf), "Loaded %s", filename);
 		else
 			snprintf(buf, sizeof(buf), "Failed to load %s", filename);
 		screen.status(buf);
 		break;
-	case 6:
+	case F6:
 		screen.status(io.files.checkpoint());
 		break;
-	case 7:
+	case F7:
 		if (filename)
 			io.files.restore(filename);
 		break;
-	case 10:
+	case F10:
 		debug_cpu = !debug_cpu;
 		break;
 	}
@@ -109,6 +112,7 @@ static const uint8_t VIA_IRQ = 2;
 void setup() {
 
 	machine.begin();
+	ps2.begin();
 
 	DBG_INI("RAM:   %dkB at 0x%04x", RAM_PAGES, RAM_BASE);
 	for (int i = 0; i < RAM_PAGES; i++)

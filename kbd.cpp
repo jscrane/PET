@@ -1,9 +1,7 @@
-#include <pgmspace.h>
-#include <stdint.h>
-#include <machine.h>
-#include <ps2_raw_kbd.h>
-#include <hardware.h>
+#include <cstdint>
+#include <compat.h>
 #include <debugging.h>
+
 #include "kbd.h"
 
 // http://www.6502.org/users/andre/petindex/keyboards.html
@@ -68,7 +66,7 @@ static const uint8_t ctrlmap[128] PROGMEM = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, // 0x78
 };
 
-uint8_t kbd::_map(uint8_t scan) {
+uint8_t kbd::_map(uint8_t scan) const {
 	if (_shift)
 		return pgm_read_byte(shiftmap + scan);
 
@@ -82,97 +80,104 @@ void kbd::_reset(uint8_t k) {
 	_rows[(k & 0xf0) >> 4] &= ~(1 << (k & 0x0f));
 }
 
-void kbd::up(uint8_t scan) {
+void kbd::up(uint16_t scan) {
 
-	DBG_EMU("key up: %02x", scan);
+	DBG_EMU("key up: %04x", scan);
 
-	if (_ext) {
-		_ext = false;
+	if (scan == PS2_RSHIFT) {
+		reset();		// reset any depressed keys so they don't get stuck
+		_shift = false;
+	} else if (is_ps2_ctrl(scan)) {
+		reset();
+		_ctrl = false;
+	} else if (scan < 0x80)
+		_reset(_map(scan));
+	else if (scan & PS2_MOD_EXT) {
 		switch(scan) {
-		case 0x69:	// end
-			_reset(0x80);
-		case 0x6c:	// home
+		case PS2_END:
+			_reset(0x80);	// fallthrough
+		case PS2_HOME:
 			_reset(0x06);
 			break;
-		case 0x75:	// up
-			_reset(0x80);
-		case 0x72:	// down
+		case PS2_UP:
+			_reset(0x80);	// fallthrough
+		case PS2_DOWN:
 			_reset(0x16);
 			break;
-		case 0x6b:	// left
-			_reset(0x80);
-		case 0x74:	// right
+		case PS2_LEFT:
+			_reset(0x80);	// fallthrough
+		case PS2_RIGHT:
 			_reset(0x07);
 			break;
-		case 0x70:	// ins
-			_reset(0x80);
-		case 0x71:	// del
+		case PS2_INS:
+			_reset(0x80);	// fallthrough
+		case PS2_DEL:
 			_reset(0x17);
 			break;
-		default:
-			if (scan < 0x80)
-				_reset(_map(scan));
+		case PS2_KEYPAD_ENTER:
+			_reset(_map(0x5a));
+			break;
+		case PS2_KEYPAD_SLASH:
+			_reset(_map(0x4a));
+			break;
+		default:		// ignore other extended keys
 			break;
 		}
-	} else if (scan == 0x59)	// R-Shift
-		_shift = false;
-	else if (is_ps2_ctrl(scan))
-		_ctrl = false;
-	else if (scan < 0x80)
-		_reset(_map(scan));
+	}
 }
 
 void kbd::_set(uint8_t k) {
 	_rows[(k & 0xf0) >> 4] |= 1 << (k & 0x0f);
 }
 
-void kbd::down(uint8_t scan) {
+void kbd::down(uint16_t scan) {
 
-	DBG_EMU("key down: %02x", scan);
+	DBG_EMU("key down: %04x", scan);
 
-	if (scan == 0xe0)
-		_ext = true;
-	else if (_ext) {
-		_ext = false;
-		switch(scan) {
-		case 0x69:	// end
-			_set(0x80);
-		case 0x6c:	// home
-			_set(0x06);
-			break;
-		case 0x75:	// up
-			_set(0x80);
-		case 0x72:	// down
-			_set(0x16);
-			break;
-		case 0x6b:	// left
-			_set(0x80);
-		case 0x74:	// right
-			_set(0x07);
-			break;
-		case 0x70:	// ins
-			_set(0x80);
-		case 0x71:	// del
-			_set(0x17);
-			break;
-		default:
-			if (scan < 0x80)
-				_set(_map(scan));
-		}
-	} else if (scan == 0x59) {	// R-Shift
-		// reset any depressed keys so they don't get stuck
-		reset();
+	if (scan == PS2_RSHIFT) {
+		reset();		// reset any depressed keys so they don't get stuck
 		_shift = true;
 	} else if (is_ps2_ctrl(scan)) {
 		reset();
 		_ctrl = true;
 	} else if (scan < 0x80)
 		_set(_map(scan));
+	else if (scan & PS2_MOD_EXT) {
+		switch (scan) {
+		case PS2_END:
+			_set(0x80);	// fallthrough
+		case PS2_HOME:
+			_set(0x06);
+			break;
+		case PS2_UP:
+			_set(0x80);	// fallthrough
+		case PS2_DOWN:
+			_set(0x16);
+			break;
+		case PS2_LEFT:
+			_set(0x80);	// fallthrough
+		case PS2_RIGHT:
+			_set(0x07);
+			break;
+		case PS2_INS:
+			_set(0x80);	// fallthrough
+		case PS2_DEL:
+			_set(0x17);
+			break;
+		case PS2_KEYPAD_ENTER:
+			_set(_map(0x5a));
+			break;
+		case PS2_KEYPAD_SLASH:
+			_set(_map(0x4a));
+			break;
+		default:		// ignore other extended keys
+			break;
+		}
+	}
 }
 
 void kbd::reset() {
 	for (int i = sizeof(_rows); i--; )
 		_rows[i] = 0;
-	_ctrl = false;
-	_shift = false;
+	_ctrl = _shift = false;
 }
