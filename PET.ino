@@ -42,15 +42,16 @@ prom edit(edit2, 2048);
 #error "ROM_SET not defined"
 #endif
 
-ram<> pages[RAM_PAGES];
-flash_filer files(PROGRAMS);
-petio io(files);
-kbd keyboard;
-ps2_raw_kbd ps2(keyboard);
-screen screen;
 Memory memory;
 r6502 cpu(memory);
 Arduino machine(cpu);
+
+ram<> pages[RAM_PAGES];
+flash_filer files(PROGRAMS);
+petio io(files, machine.sound_pwm());
+kbd keyboard;
+ps2_raw_kbd ps2(keyboard);
+screen screen;
 
 static bool debug_cpu;
 

@@ -2,14 +2,13 @@
 
 #include <machine.h>
 #include <memory.h>
-#include <serialio.h>
 #include <filer.h>
 #include <pia.h>
 #include <via.h>
 #include <debugging.h>
+#include <pwm_sound.h>
 
 #include "petio.h"
-#include "sound.h"
 
 // see http://www.zimmers.net/anonftp/pub/cbm/firmware/computers/pet/PET-Interfaces.txt
 // and http://www.6502.org/users/andre/petindex/progmod.html
@@ -25,9 +24,7 @@
 // 1ms internal clock tick
 #define TICK_PERIOD	1000
 
-sound sound;
-
-petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
+petio::petio(filer &files, sound_sink &sound): files(files), _sound(sound) {
 	put(pia1, PIA1_OFFSET);
 	put(pia2, PIA2_OFFSET);
 	put(via, VIA_OFFSET);
@@ -35,7 +32,7 @@ petio::petio(filer &files): files(files), _ticks(0), _timer(-1) {
 
 void petio::reset() {
 
-	sound.reset();
+	sound_reset();
 	pia1.reset();
 	pia2.reset();
 	via.reset();
@@ -44,6 +41,7 @@ void petio::reset() {
 
 	if (_timer >= 0)
 		_machine->cancel_timer(_timer);
+
 	_timer = _machine->interval_timer(TICK_PERIOD, [this]() { tick(); });
 }
 
@@ -64,13 +62,13 @@ void petio::operator=(uint8_t r) {
 
 	switch (_acc - VIA_OFFSET) {
 	case 0x08:
-		sound.frequency(r);
+		sound_frequency(r);
 		break;
 	case 0x0a:
-		sound.octave(r);
+		sound_octave(r);
 		break;
 	case 0x0b:
-		sound.on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
+		sound_on_off((r & VIA::ACR_SHIFT_MASK) == VIA::ACR_SO_T2_RATE);
 		break;
 	}
 }
@@ -105,4 +103,33 @@ bool petio::load_prg() {
 	memory[0xca] = hi;
 
 	return true;
+}
+
+void petio::sound_off() {
+	_sound.off();
+}
+
+void petio::sound_on() {
+	if (_freq > 0) {
+		unsigned f = _freq;
+		if (_octave == 15)
+			f /= 2;
+		else if (_octave == 85)
+			f *= 2;
+		_sound.tone(f);
+	}
+}
+
+void petio::sound_frequency(uint8_t p) {
+	if (p == 0)
+		sound_off();
+	else {
+		_freq = 1000000 / (16*p + 30);
+		sound_on();
+	}
+}
+
+void petio::sound_octave(uint8_t o) {
+	_octave = o;
+	sound_on_off(o == 15 || o == 51 || o == 85);
 }
