@@ -48,7 +48,7 @@ Arduino machine(cpu);
 
 ram<> pages[RAM_PAGES];
 flash_filer files(PROGRAMS);
-petio io(files, machine.sound_pwm());
+petio io(files, machine.sound());
 kbd keyboard;
 ps2_raw_kbd ps2(keyboard);
 screen screen;
