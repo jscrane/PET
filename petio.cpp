@@ -2,7 +2,7 @@
 
 #include <machine.h>
 #include <memory.h>
-#include <filer.h>
+#include <flash_filer.h>
 #include <pia.h>
 #include <via.h>
 #include <debugging.h>
@@ -24,7 +24,7 @@
 // 1ms internal clock tick
 #define TICK_PERIOD	1000
 
-petio::petio(filer &files, sound_sink &sound): files(files), _sound(sound) {
+petio::petio(flash_file &tape, sound_sink &sound): _tape(tape), _sound(sound) {
 	put(pia1, PIA1_OFFSET);
 	put(pia2, PIA2_OFFSET);
 	put(via, VIA_OFFSET);
@@ -77,14 +77,14 @@ bool petio::load_prg() {
 
 	extern Memory memory;
 
-	if (!files.more())
+	if (!_tape.more())
 		return false;
 
-	uint8_t lo = files.read();
-	uint8_t hi = files.read();
+	uint8_t lo = _tape.read();
+	uint8_t hi = _tape.read();
 	Memory::address a = lo + (hi << 8);
-	while (files.more())
-		memory[a++] = files.read();
+	while (_tape.more())
+		memory[a++] = _tape.read();
 
 	// based on mem_get/set_basic_text() from vice/petmem.c
 	memory[0xc7] = memory[0x28];

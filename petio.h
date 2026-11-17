@@ -1,22 +1,19 @@
 #pragma once
 
-class filer;
+class flash_file;
 class sound_sink;
 
 class petio: public Memory::Devices {
 public:
-	petio(filer &files, sound_sink &s);
+	petio(flash_file &tape, sound_sink &s);
 
 	PIA pia1;
 	PIA pia2;
 	VIA via;
 
 	void reset();
-	bool start() { return files.start(); }
 
 	void operator= (uint8_t);
-
-	filer &files;
 
 	// loads the currently-selected file
 	bool load_prg();
@@ -36,5 +33,6 @@ private:
 	uint8_t _octave = 0;
 	uint32_t _freq = 0;
 
+	flash_file &_tape;
 	sound_sink &_sound;
 };

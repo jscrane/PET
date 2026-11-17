@@ -14,6 +14,10 @@
 #include "kbd.h"
 #include "petio.h"
 
+#if defined(USE_SPIRAM)
+#include <spiram.h>
+#endif
+
 #if ROM_SET == series4
 #include "roms/basic4_b000.h"
 #include "roms/basic4_c000.h"
@@ -47,8 +51,9 @@ r6502 cpu(memory);
 Arduino machine(cpu);
 
 ram<> pages[RAM_PAGES];
-flash_filer files(PROGRAMS);
-petio io(files, machine.sound());
+flash_device tape("Tape");
+flash_filer files(PROGRAMS, tape);
+petio io(tape, machine.sound());
 kbd keyboard;
 ps2_raw_kbd ps2(keyboard);
 screen screen;
@@ -63,7 +68,7 @@ static void reset(bool sd) {
 
 	if (!sd)
 		screen.status("No SD Card");
-	else if (!io.start())
+	else if (!files.start())
 		screen.status("Failed to open " PROGRAMS);
 
 	debug_cpu = false;
@@ -79,11 +84,11 @@ static void function_keys(uint16_t key) {
 		machine.reset();
 		break;
 	case F2:
-		filename = io.files.advance();
+		filename = files.advance();
 		screen.status(filename? filename: "No file");
 		break;
 	case F3:
-		filename = io.files.rewind();
+		filename = files.rewind();
 		screen.status(filename? filename: "No file");
 		break;
 	case F4:
@@ -94,11 +99,11 @@ static void function_keys(uint16_t key) {
 		screen.status(buf);
 		break;
 	case F6:
-		screen.status(io.files.checkpoint());
+		screen.status(files.checkpoint());
 		break;
 	case F7:
 		if (filename)
-			io.files.restore(filename);
+			files.restore(filename);
 		break;
 	case F10:
 		debug_cpu = !debug_cpu;
