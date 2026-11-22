@@ -22,14 +22,14 @@ endif
 ifeq ($t, rp2040)
 BOARD := adafruit_feather_dvi
 flash := 8388608_2097152
-CPPFLAGS += -DDVI_BIT_DEPTH=1 -DDVI_RESOLUTION=DVI_640x240
+CPPFLAGS += -DDVI_BIT_DEPTH=1 -DDVI_RESOLUTION=DVI_640x240 -DUSE_LITTLEFS
 LIBRARIES += LittleFS PicoDVI
 endif
 
 ifeq ($t, esp32)
 UploadSpeed := 921600
 FS_DIR := data
-LIBRARIES += FS SPIFFS
+LIBRARIES += FS
 
 ifeq ($b, lilygo)
 BOARD := ttgo-t7-v14-mini32
@@ -42,7 +42,7 @@ BOARD := lolin32
 CPPFLAGS += -DUSER_SETUP_LOADED -DILI9341_DRIVER -DTFT_CS=5 -DTFT_DC=2 \
 	-DTFT_RST=-1 -DSPI_FREQUENCY=40000000 -DLOAD_GLCD \
 	-DHARDWARE_H=\"hw/esp32-example.h\"
-LIBRARIES += TFT_eSPI
+LIBRARIES += TFT_eSPI LittleFS
 endif
 endif
 

@@ -8,6 +8,8 @@
 #include <debugging.h>
 #include <ps2_raw_kbd.h>
 #include <flash_filer.h>
+#include <checkpoint_device.h>
+#include <keys.h>
 
 #include "config.h"
 #include "screen.h"
@@ -51,8 +53,9 @@ r6502 cpu(memory);
 Arduino machine(cpu);
 
 ram<> pages[RAM_PAGES];
-flash_device tape("Tape");
-flash_filer files(PROGRAMS, tape);
+flash_device tape("Tape", "prg", readonly);
+checkpoint_device chk("Chk");
+flash_filer files(PROGRAMS, tape, chk);
 petio io(tape, machine.sound());
 kbd keyboard;
 ps2_raw_kbd ps2(keyboard);
@@ -76,39 +79,43 @@ static void reset(bool sd) {
 
 static void function_keys(uint16_t key) {
 
-	static const char *filename;
-
-	char buf[32];
 	switch (key) {
 	case F1:
 		machine.reset();
-		break;
+		return;
 	case F2:
-		filename = files.advance();
-		screen.status(filename? filename: "No file");
+		files.next_device();
 		break;
 	case F3:
-		filename = files.rewind();
-		screen.status(filename? filename: "No file");
+		files.advance();
+		break;
+	case F3 | keys::MOD_CTRL:
+		files.rewind();
 		break;
 	case F4:
 		if (io.load_prg())
-			snprintf(buf, sizeof(buf), "Loaded %s", filename);
+			screen.statusf("Loaded %s", files.filename());
 		else
-			snprintf(buf, sizeof(buf), "Failed to load %s", filename);
-		screen.status(buf);
-		break;
+			screen.statusf("Failed to load %s", files.filename());
+		return;
 	case F6:
-		screen.status(files.checkpoint());
+	case F6 | keys::MOD_SHIFT:
+		if (!chk.save(key & keys::MOD_SHIFT)) {
+			screen.status("Checkpoint failed");
+			return;
+		}
 		break;
 	case F7:
-		if (filename)
-			files.restore(filename);
+		if (chk.filename() && !chk.restore()) {
+			screen.status("Restore failed");
+			return;
+		}
 		break;
 	case F10:
 		debug_cpu = !debug_cpu;
-		break;
+		return;
 	}
+	screen.statusf("%s:%s", files.current().name(), files.filename()? files.filename(): "No file selected");
 }
 
 static const uint8_t PIA1_IRQA = 0;

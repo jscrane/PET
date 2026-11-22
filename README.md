@@ -22,8 +22,9 @@ All of the firmware is from [zimmers.net](http://www.zimmers.net/anonftp/pub/cbm
 
 Function Keys:
 - F1 = reset
-- F2 = tape advance
-- F3 = tape rewind
+- F2 = next device
+- F3 = advance to next file
+- Ctrl-F3 = rewind to first file
 - F4 = load .prg file selected by tape
 - F6 = checkpoint the machine state to disk
 - F7 = restore from selected checkpoint file
